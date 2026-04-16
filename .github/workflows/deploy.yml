@@ -1,0 +1,32 @@
+name: Deploy Finances App
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@v1.2.5
+        with:
+          host: ${{ secrest.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          port: 22
+          script: |
+            cd /home/mourczt/Finances
+            
+            git pull origin main
+
+            source venv/bin/activate
+
+            pip install -r requirements.txt
+
+            alembic upgrade head
+
+            # sudo systemctl restart finances_app
