@@ -19,7 +19,7 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            cd /home/mourczt/finances
+            cd /home/moruczt/finances
             
             git pull origin main
 
