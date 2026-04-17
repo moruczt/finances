@@ -28,7 +28,7 @@ def upgrade() -> None:
                              sa.column("name", sa.String),
                              sa.column("side", sa.String),
                              sa.column("test", sa.String))
-    op.bult_insert(account_table, [
+    op.bulk_insert(account_table, [
                     {"name":"mbh","side":"Assets","test":"asd"},
                     {"name":"erste","side":"Assets","test":"dsa"}])
 
