@@ -23,6 +23,7 @@ class Account(Base):
     side = Column(Enum(AccountSide), nullable=False)
     path = Column(String(255), unique=True)
     created_at = Column(DateTime, server_default=func.now())
+    test = Column(String(100))
 
     children = relationship("Account", backref="parent", remote_side=[id])
 
