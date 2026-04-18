@@ -30,7 +30,7 @@ function showToast(msg, type='error', duration=4000) {
     const container = document.getElementById("toast-container");
 
     const toast = document.createElement("div");
-    toast.className = `toast toast-${type}`;
+    toast.className = `toast toast-${type} translate-y-10 opacity-0`;
     toast.textContent = msg;
     container.appendChild(toast);
 
