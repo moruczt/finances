@@ -43,10 +43,10 @@ function showToast(msg, type='error', duration=4000) {
         setTimeout(() => toast.remove(), 300)
     };
 
-    const timeout = setTimeout(removeToast, duration);
+    // const timeout = setTimeout(removeToast, duration);
 
     toast.onclick = () => {
-        clearTimeout(timeout);
+        // clearTimeout(timeout);
         removeToast();
     }
 }
