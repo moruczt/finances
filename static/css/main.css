@@ -1,0 +1,24 @@
+@import "tailwindcss";
+
+@layer components {
+    .toast {
+        @apply px-6 py-3 rounded-lg shadow-xl font-medium transform transition-all duration-300 translate-y-10 opacity-0 cursor-pointer hover:scale-105 backdrop-blur-sm border-l-4;
+    }
+
+    .toast-success {
+        @apply bg-green-600/90 text-white border-green-300;
+    }
+
+    .toast-error {
+        @apply bg-red-600/90 text-white border-red-300;
+    }
+
+    .toast-warning {
+        @apply bg-yellow-500/90 text-black border-yellow-200;
+    }
+
+    .toast-info {
+        @apply bg-blue-600/90 text-white border-blue-300;
+    }
+
+}

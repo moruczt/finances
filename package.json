@@ -1,0 +1,24 @@
+{
+  "name": "finances",
+  "version": "1.0.0",
+  "description": "Handful app for categorizing your transactions.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/moruczt/finances.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/moruczt/finances/issues"
+  },
+  "homepage": "https://github.com/moruczt/finances#readme",
+  "dependencies": {
+    "@tailwindcss/cli": "^4.2.2",
+    "tailwindcss": "^4.2.2"
+  }
+}

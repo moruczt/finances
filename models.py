@@ -31,7 +31,6 @@ class AccountConfig(Base):
     id = Column(Integer, primary_key=True)
     account_id = Column(Integer, ForeignKey("accounts.id"))
     parser = Column(String(100), nullable=False)
-    created_at = Column(DateTime, server_default=func.now())
 
     children = relationship("Account", backref="parent", remote_side=[id])
 
@@ -42,7 +41,6 @@ class Rule(Base):
     account_id = Column(Integer, ForeignKey("accounts.id"), nullable=False)
     target_account_id = Column(Integer, ForeignKey("accounts.id"), nullable=False)
     conditions = Column(JSON, nullable=False)
-    created_at = Column(DateTime, server_default=func.now())
 
     children = relationship("Account", backref="parent", remote_side=[id])
 
@@ -54,7 +52,6 @@ class RawImport(Base):
     raw_data = Column(JSON, nullable=False)
     row_hash = Column(String(64), unique=True, index=True)
     source_filename = Column(String(255), nullable=False)
-    created_at = Column(DateTime, server_default=func.now())
 
 class Transaction(Base):
     __tablename__ = "transactions"
@@ -62,7 +59,7 @@ class Transaction(Base):
     id = Column(Integer, primary_key=True)
     date = Column(DateTime, nullable=False, index=True)
     description = Column(String(255))
-    created_at = Column(DateTime, server_default=func.now())
+    source = Column(String(255))
 
     entries = relationship("Entry", back_populates="transaction")
 
@@ -77,6 +74,5 @@ class Entry(Base):
     amount_orig = Column(Numeric(precision=20, scale=4), nullable=False)
     exchange_rate = Column(Numeric(precision=20, scale=4), nullable=False)
     currency = Column(String(3), nullable=False)
-    created_at = Column(DateTime, server_default=func.now())
 
     transaction = relationship("Transaction", back_populates="entries")
