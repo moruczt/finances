@@ -19,7 +19,7 @@ jobs:
       - name: Build Tailwind CSS
         run: |
           npm install tailwindcss @tailwindcss/cli
-          npx @tailwindcss/cli -i /static/css/input.css -o /static/css/main.css --minify
+          npx @tailwindcss/cli -i ./static/css/input.css -o ./static/css/main.css --minify
 
       - name: Copy CSS to VPS
         uses: appleboy/scp-action@v1.0.0
