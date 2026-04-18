@@ -5,7 +5,7 @@ from sqlalchemy.orm import relationship, DeclarativeBase
 
 
 class Base(DeclarativeBase):
-    pass
+    created_at = Column(DateTime, server_default=func.now())
 
 class AccountSide(enum.Enum):
     Assets = "Assets"
@@ -22,7 +22,6 @@ class Account(Base):
     name = Column(String(100), nullable=False)
     side = Column(Enum(AccountSide), nullable=False)
     path = Column(String(255), unique=True)
-    created_at = Column(DateTime, server_default=func.now())
 
     children = relationship("Account", backref="parent", remote_side=[id])
 
