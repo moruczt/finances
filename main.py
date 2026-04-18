@@ -9,7 +9,7 @@ from .database import get_db
 from . import models
 
 
-app = FastAPI(title="Finances")
+app = FastAPI(root_path="/finances", title="Finances")
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
