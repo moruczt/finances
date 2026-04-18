@@ -4,6 +4,7 @@ __pycache__/
 *$py.class
 venv/
 .env
+static/css/main.css
 
 node_modules/
 npm-debug.log*
