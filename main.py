@@ -5,8 +5,8 @@ from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 
-from .database import get_db
-from . import models
+from database import get_db
+import models
 
 
 app = FastAPI(root_path="/finances", title="Finances")
