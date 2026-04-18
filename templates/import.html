@@ -1,0 +1,33 @@
+{% extends "base.html" with context %}
+
+{% block title %} - Import{% endblock %}
+
+{% block scripts %}
+    <script type="text/javascript" charset="UTF-8" src="{{ url_for('static', path='/js/import.js') }}"></script>
+{% endblock %}
+
+{% block content %}
+    <div class="import-container">
+        <h2>Manual Transaction Import</h2>
+
+        <form id="uploadForm">
+            <select id="accountSelect" required>
+                <option value="1">OTP Bank</option>
+                <option value="2">MBH Debit</option>
+            </select>
+            
+            <input type="file" id="fileInput" required>
+            
+            <button type="submit" id="submitBtn">Upload</button>
+        </form>
+
+        <div id="spinner" style="display: none;">⏳ Processing...</div>
+        <div id="resultArea"></div>
+
+        <hr>
+
+        <div id="result-area">
+            <p class="muted">Upload a file to see results here.</p>
+        </div>
+    </div>
+{% endblock %}
