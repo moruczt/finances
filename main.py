@@ -22,9 +22,17 @@ async def page_dashboard():
 
 @app.get("/import", response_class=HTMLResponse)
 async def page_import(request:Request):
+    accounts = {"1":"ErsteDebit",
+                "2":"ErsteCredit",
+                "3":"ErsteWizz",
+                "4":"MbhDebit",
+                "5":"MbhCredit"}
+    importLog = ""
     return templates.TemplateResponse(
                 request=request,
-                name="import.html")
+                name="import.html",
+                context={"accounts":accounts,
+                         "importLog":importLog})
 
 @app.get("/manual")
 async def page_manual():
