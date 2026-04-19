@@ -1,8 +1,21 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
 <head>
-    <title>Finances {% block title %}{% endblock %}</title>
-    <script type="text/javascript" charset="UTF-8" src="{{ url_for('static', path='/js/finances.js').path }}"></script>
+    <title>Finances{% block title %} | Dashboard{% endblock %}</title>
+
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <meta name="referrer" content="same-origin">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="theme-color" content="#3b82f6">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', path='/img/favicon-32x32.png').path }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', path='/img/apple-touch-icon.png').path }}">
+
+    <script defer src="{{ url_for('static', path='/js/finances.js').path }}"></script>
     {% block scripts %}
     {% endblock %}
     <link type="text/css" rel="stylesheet" href="{{ url_for('static', path='/css/main.css').path }}">

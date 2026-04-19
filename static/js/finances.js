@@ -35,12 +35,12 @@ function showToast(msg, type='error', duration=4000) {
     container.appendChild(toast);
 
     setTimeout(() => {
-        toast.classList.remove("translate-y-10","opacity-0")
+        toast.classList.remove("translate-y-10","opacity-0");
     }, 10);
 
     const removeToast = () => {
         toast.classList.add("opacity-0", "scale-95");
-        setTimeout(() => toast.remove(), 300)
+        setTimeout(() => toast.remove(), 300);
     };
 
     const timeout = setTimeout(removeToast, duration);
