@@ -21,15 +21,15 @@ jobs:
           npm install tailwindcss @tailwindcss/cli
           npx @tailwindcss/cli -i ./static/css/input.css -o ./static/css/main.css --minify
 
-      # - name: Copy CSS to VPS
-      #   uses: appleboy/scp-action@v1.0.0
-      #   with:
-      #     host: ${{ secrets.SERVER_IP }}
-      #     username: ${{ secrets.SERVER_USER }}
-      #     key: ${{ secrets.SSH_KEY }}
-      #     port: ${{secrets.SSH_PORT }}
-      #     source: "static/css/main.css"
-      #     target: "/home/moruczt/finances/"
+      - name: Copy CSS to VPS
+        uses: appleboy/scp-action@v1.0.0
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{secrets.SSH_PORT }}
+          source: "static/css/main.css"
+          target: "/home/moruczt/finances/"
 
       - name: Deploy to VPS
         uses: appleboy/ssh-action@v1.2.5
