@@ -2,17 +2,23 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
+from redis import asyncio as aioredis
 
-DATABASE_URL = os.getenv("DATABASE_URL")
+POSTGRES_URL = os.getenv("POSTGRES_URL")
+REDIS_URL = os.getenv("REDIS_URL")
 
-engine = create_engine(DATABASE_URL)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+engine = create_async_engine(POSTGRES_URL)
+AsyncSessionLocal = async_sessionmaker(bind=engine, class_=AsyncSession, autoflush=False, expire_on_commit=False, autocommit=False)
+redis_pool = aioredis.ConnectionPool.from_url(REDIS_URL, decode_responses=True)
 
-def get_db():
-    db = SessionLocal()
+async def get_redis():
+    client = aioredis.Redis(connection_pool=redis_pool)
     try:
-        yield db
+        yield client
     finally:
-        db.close()
+        client.close()
+
+async def get_db():
+    async with AsyncSessionLocal() as session:
+        yield session

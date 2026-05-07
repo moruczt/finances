@@ -2,6 +2,7 @@ async function request(url, method="GET", data=null, onload=null, contentType="j
     try {
         const options = {};
         if (method != "GET") {
+            options["method"] = method;
             if (contentType == "json") {
                 options["headers"] = {"Content-Type":"application/json"};
                 options["body"] = JSON.stringify(data);
@@ -13,12 +14,12 @@ async function request(url, method="GET", data=null, onload=null, contentType="j
 
         if (!response.ok) throw new Error('Request failed');
 
-        const result = await response.json();
-        if (!data.success) {
-            showToast(data.msg, data.msgType, data.msgDur);
+        const resp = await response.json();
+        if (resp.msg) {
+            showToast(resp.msg, resp.msgType, resp.msgDur);
         }
 
-        onload(result);
+        onload(resp);
     } catch (error) {
         console.error("Request Error:", error.message);
         showToast(error.message);

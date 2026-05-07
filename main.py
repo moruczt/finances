@@ -1,27 +1,63 @@
+import os
+from dotenv import load_dotenv
+load_dotenv()
+import uuid
+from typing import Annotated
 
-from fastapi import FastAPI, Depends, HTTPException, Request
-# from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
-from fastapi.responses import HTMLResponse
+from fastapi import FastAPI, Depends, Request, UploadFile, File, Form
+from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
+from redis.asyncio import Redis
 
-from database import get_db
+from database import get_db, get_redis
 import models
+import utils
 
 
 app = FastAPI(root_path="/finances", title="Finances")
-# app.add_middleware(HTTPSRedirectMiddleware)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
+@app.exception_handler(utils.AuthenticationRequiredException)
+async def auth_exception_handler(request:Request, exc:utils.AuthenticationRequiredException):
+    accept_header = request.headers.get("accept","")
+    if "text/html" in accept_header:
+        return RedirectResponse(url="/login", status_code=303)
+    else:
+        return JSONResponse(status_code=401,
+                            content={"detail":"Not authenticated",
+                                     "action":"redirect_to_login"})
+
+AuthedUser = Annotated[str, Depends(utils.auth_session)]
+DB = Annotated[Session, Depends(get_db)]
 
 @app.get("/")
-async def page_dashboard():
+async def page_dashboard(user:AuthedUser):
     return {"status":"Online"}
 
+@app.get("/login", response_class=HTMLResponse)
+async def page_login(request:Request):
+    return templates.TemplateResponse(
+                request=request,
+                name="login.html",
+                context={})
+
+@app.post("/login")
+async def send_login(username:Annotated[str,Form(...)], password:Annotated[str,Form(...)], redis:Annotated[Redis,Depends(get_redis)]):
+    user = utils.authenticate_user(username, password)
+    if not user:
+        raise utils.AuthenticationRequiredException("Invalid credentials")
+    session_id = str(uuid.uuid4())
+    await redis.setex(f"session:{session_id}", 60*60, user)
+    resp = RedirectResponse(url="/dashboard", status_code=303)
+    resp.set_cookie(key="session_id", value=session_id, httponly=True, domain=os.getenv("DOMAIN"), samesite="strict", secure=True)
+    return resp
+    
+
 @app.get("/import", response_class=HTMLResponse)
-async def page_import(request:Request):
+async def page_import(request:Request, db:DB):
     accounts = {"1":"ErsteDebit",
                 "2":"ErsteCredit",
                 "3":"ErsteWizz",
@@ -41,3 +77,18 @@ async def page_manual():
 @app.get("/categorise")
 async def page_categorise():
     return "CATEGORISE HTML"
+
+
+## APIs
+@app.post("/api/accounts/{account_id}/import")
+async def import_raw(account_id:int, db:DB, file:Annotated[UploadFile,File(...)]):
+    account = db.query(models.Account).filter(models.Account.id == account_id).first()
+
+    if account is None:
+        return {"success":False, "msg":"Missing account", "msgType":"error", "msgDur":4000}
+    
+    if not file.filename.endswith((".csv",".xlsx")):
+        return {"success":False, "msg":"Invalid file extension", "msgType":"error", "msgDur":4000}
+    
+    return {"success":True, "msg":"File imported successfully", "msgType":"success", "msgDur":4000}
+    
