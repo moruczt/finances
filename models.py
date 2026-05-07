@@ -13,7 +13,7 @@ class User(Base):
     id = Column(Integer, primary_key=True)
     username = Column(String(50), unique=True, index=True, nullable=False)
     password = Column(String(255), nullable=False)
-    active = Column(Boolean, nullable=False, server_default=True)
+    active = Column(Boolean, nullable=False, server_default="true")
 
 class AccountSide(enum.Enum):
     Assets = "Assets"
