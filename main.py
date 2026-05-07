@@ -31,7 +31,7 @@ async def auth_exception_handler(request:Request, exc:utils.AuthenticationRequir
                                      "action":"redirect_to_login"})
 
 AuthedUser = Annotated[str, Depends(utils.auth_session)]
-DB = Annotated[Session,Depends(get_db)]
+DB = Annotated[Session, Depends(get_db)]
 
 @app.get("/")
 async def page_dashboard(user:AuthedUser):
@@ -52,7 +52,7 @@ async def send_login(username:Annotated[str,Form(...)], password:Annotated[str,F
     session_id = str(uuid.uuid4())
     await redis.setex(f"session:{session_id}", 60*60, user)
     resp = RedirectResponse(url="/dashboard", status_code=303)
-    resp.set_cookie(key="session_id", value=session_id, httponly=True, domain=os.getenv("DOMAIN"), samesite="strict")
+    resp.set_cookie(key="session_id", value=session_id, httponly=True, domain=os.getenv("DOMAIN"), samesite="strict", secure=True)
     return resp
     
 
