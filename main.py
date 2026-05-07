@@ -24,7 +24,7 @@ templates = Jinja2Templates(directory="templates")
 async def auth_exception_handler(request:Request, exc:utils.AuthenticationRequiredException):
     accept_header = request.headers.get("accept","")
     if "text/html" in accept_header:
-        return RedirectResponse(url="/login", status_code=303)
+        return RedirectResponse(url=request.url_for("page_login"), status_code=303)
     else:
         return JSONResponse(status_code=401,
                             content={"detail":"Not authenticated",
