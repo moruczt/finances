@@ -33,10 +33,13 @@ async def auth_exception_handler(request:Request, exc:utils.AuthenticationRequir
 AuthedUser = Annotated[str, Depends(utils.auth_session)]
 DB = Annotated[Session, Depends(get_db)]
 
+
 @app.get("/")
 async def page_dashboard(user:AuthedUser):
     return {"status":"Online"}
 
+
+## LOGIN
 @app.get("/login", response_class=HTMLResponse)
 async def page_login(request:Request):
     return templates.TemplateResponse(
@@ -54,10 +57,11 @@ async def send_login(request:Request, username:Annotated[str,Form(...)], passwor
     resp = RedirectResponse(url=request.url_for("page_dashboard"), status_code=303)
     resp.set_cookie(key="session_id", value=session_id, httponly=True, domain=os.getenv("DOMAIN"), samesite="strict", secure=True)
     return resp
-    
 
+
+## PAGES
 @app.get("/import", response_class=HTMLResponse)
-async def page_import(request:Request, db:DB):
+async def page_import(request:Request, db:DB, user:AuthedUser):
     accounts = {"1":"ErsteDebit",
                 "2":"ErsteCredit",
                 "3":"ErsteWizz",

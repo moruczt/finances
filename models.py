@@ -7,6 +7,14 @@ from sqlalchemy.orm import relationship, DeclarativeBase
 class Base(DeclarativeBase):
     created_at = Column(DateTime, server_default=func.now())
 
+class User(Base):
+    __tablename__ = "users"
+
+    id = Column(Integer, primary_key=True)
+    username = Column(String(50), unique=True, index=True, nullable=False)
+    password = Column(String(255), nullable=False)
+    active = Column(Boolean, nullable=False, server_default=True)
+
 class AccountSide(enum.Enum):
     Assets = "Assets"
     Liabilities = "Liabilities"
