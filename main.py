@@ -45,13 +45,13 @@ async def page_login(request:Request):
                 context={})
 
 @app.post("/login")
-async def send_login(username:Annotated[str,Form(...)], password:Annotated[str,Form(...)], redis:Annotated[Redis,Depends(get_redis)]):
+async def send_login(request:Request, username:Annotated[str,Form(...)], password:Annotated[str,Form(...)], redis:Annotated[Redis,Depends(get_redis)]):
     user = utils.authenticate_user(username, password)
     if not user:
         raise utils.AuthenticationRequiredException("Invalid credentials")
     session_id = str(uuid.uuid4())
     await redis.setex(f"session:{session_id}", 60*60, user)
-    resp = RedirectResponse(url="/dashboard", status_code=303)
+    resp = RedirectResponse(url=request.url_for("page_dashboard"), status_code=303)
     resp.set_cookie(key="session_id", value=session_id, httponly=True, domain=os.getenv("DOMAIN"), samesite="strict", secure=True)
     return resp
     
