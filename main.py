@@ -2,6 +2,7 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 import uuid
+from typing import Annotated
 
 from fastapi import FastAPI, Depends, Request, UploadFile, File, Form
 from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
@@ -29,9 +30,11 @@ async def auth_exception_handler(request:Request, exc:utils.AuthenticationRequir
                             content={"detail":"Not authenticated",
                                      "action":"redirect_to_login"})
 
+AuthedUser = Annotated[str, Depends(utils.auth_session)]
+DB = Annotated[Session,Depends(get_db)]
 
 @app.get("/")
-async def page_dashboard(user:str=Depends(utils.auth_session)):
+async def page_dashboard(user:AuthedUser):
     return {"status":"Online"}
 
 @app.get("/login", response_class=HTMLResponse)
@@ -42,7 +45,7 @@ async def page_login(request:Request):
                 context={})
 
 @app.post("/login")
-async def send_login(username: str = Form(...), password: str = Form(...), redis:Redis=Depends(get_redis)):
+async def send_login(username:Annotated[str,Form(...)], password:Annotated[str,Form(...)], redis:Annotated[Redis,Depends(get_redis)]):
     user = utils.authenticate_user(username, password)
     if not user:
         raise utils.AuthenticationRequiredException("Invalid credentials")
@@ -54,7 +57,7 @@ async def send_login(username: str = Form(...), password: str = Form(...), redis
     
 
 @app.get("/import", response_class=HTMLResponse)
-async def page_import(request:Request, db: Session = Depends(get_db)):
+async def page_import(request:Request, db:DB):
     accounts = {"1":"ErsteDebit",
                 "2":"ErsteCredit",
                 "3":"ErsteWizz",
@@ -78,7 +81,7 @@ async def page_categorise():
 
 ## APIs
 @app.post("/api/accounts/{account_id}/import")
-async def import_raw(account_id: int, db: Session = Depends(get_db), file: UploadFile = File(...)):
+async def import_raw(account_id:int, db:DB, file:Annotated[UploadFile,File(...)]):
     account = db.query(models.Account).filter(models.Account.id == account_id).first()
 
     if account is None:
