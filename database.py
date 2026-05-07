@@ -13,11 +13,8 @@ AsyncSessionLocal = async_sessionmaker(bind=engine, class_=AsyncSession, autoflu
 redis_pool = aioredis.ConnectionPool.from_url(REDIS_URL, decode_responses=True)
 
 async def get_redis():
-    client = aioredis.Redis(connection_pool=redis_pool)
-    try:
+    async with aioredis.Redis(connection_pool=redis_pool) as client:
         yield client
-    finally:
-        client.close()
 
 async def get_db():
     async with AsyncSessionLocal() as session:
