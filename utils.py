@@ -18,7 +18,7 @@ def authenticate_user(username, password):
         return username
 
 async def auth_session(request:Request, redis:Redis=Depends(get_redis)) -> str:
-    session_id = request.cookies.get("session")
+    session_id = request.cookies.get("session_id")
     if not session_id:
         raise AuthenticationRequiredException()
     
