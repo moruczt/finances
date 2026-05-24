@@ -47,7 +47,7 @@ class AccountConfig(Base):
     account = relationship("Account", back_populates="configs")
 
 class Rule(Base):
-    __tablename__ = "rule"
+    __tablename__ = "rules"
 
     id = Column(Integer, primary_key=True)
     account_id = Column(Integer, ForeignKey("accounts.id"), nullable=False)
@@ -68,7 +68,7 @@ class RawImport(Base):
     
     batch = relationship("Imports", back_populates="raw_rows")
 
-class Imports(Base):
+class Import(Base):
     __tablename__ = "imports"
 
     id = Column(Integer, primary_key=True)
