@@ -66,7 +66,7 @@ class RawImport(Base):
     row_hash = Column(String(64), unique=True, index=True)
     import_id = Column(Integer, ForeignKey("imports.id"), nullable=False)
     
-    batch = relationship("Imports", back_populates="raw_rows")
+    batch = relationship("Import", back_populates="raw_rows")
 
 class Import(Base):
     __tablename__ = "imports"
@@ -78,7 +78,7 @@ class Import(Base):
     imported_count = Column(Integer)
     min_date = Column(DateTime)
     max_date = Column(DateTime)
-    success = Column(Boolean, nullable=False)
+    success = Column(Boolean)
     
     raw_rows = relationship("RawImport", back_populates="batch")
 
@@ -102,8 +102,8 @@ class Entry(Base):
     raw_import_id = Column(Integer, ForeignKey("raw_imports.id"), nullable=True)
     amount_huf = Column(Numeric(precision=20, scale=4), nullable=False)
     amount_orig = Column(Numeric(precision=20, scale=4), nullable=False)
-    exchange_rate = Column(Numeric(precision=20, scale=4), nullable=False)
-    currency = Column(String(3), nullable=False)
+    exchange_rate = Column(Numeric(precision=20, scale=4), nullable=False, server_default="1")
+    currency = Column(String(3), nullable=False, server_default="HUF")
 
     transaction = relationship("Transaction", back_populates="entries")
     account = relationship("Account", back_populates="entries")
