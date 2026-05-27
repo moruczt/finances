@@ -9,7 +9,7 @@ from fastapi import FastAPI, Depends, Request, UploadFile, File, Form
 from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
-from sqlalchemy import select
+from sqlalchemy import select, insert, update
 
 import models
 import utils
@@ -111,7 +111,16 @@ async def import_raw(account_id:int, db:DB, file:Annotated[UploadFile,File(...)]
         log(err)
         return {"success":False, "msg":"No parser available for the  account", "msgType":"error", "msgDur":4000}
 
-    parser(file)
+    query = insert(models.Import).values(account_id=account_id, file_name=file.filename).returning(models.Import.id)
+    res = await db.execute(query)
+    import_id = res.scalar_one()
+
+    imported = await parser(file, db, import_id, account_id)
+
+    query = update(models.Import).values(**imported).where(models.Import.id==import_id)
+    await db.execute(query)
+
+    await db.commit()
 
     return {"success":True, "msg":"File imported successfully", "msgType":"success", "msgDur":4000}
     
