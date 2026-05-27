@@ -11,16 +11,15 @@ from utils import log
 
 
 async def parse_otp_szep(file:UploadFile, db, import_id:int, account_id:int) -> dict:
-    hashes = []
-    fingerprints = []
     hash_cols = ["Dátum","Alszámla","Jóváírás","Terhelés","Ellenoldali név","Jogcím"]
+
     dates = []
+    headers = {}
+    data = []
     with BytesIO(file.read()) as f:
         wb = load_workbook(f, read_only=True, data_only=True, keep_links=False)
         ws = wb[wb.sheetnames[0]]
 
-        headers = {}
-        data = []
         for r, row in enumerate(ws.iter_rows(max_col=8, values_only=True)):
             for c, col in enumerate(row):
                 if not r:
@@ -30,7 +29,10 @@ async def parse_otp_szep(file:UploadFile, db, import_id:int, account_id:int) -> 
                     if headers[c] == "Dátum":
                         dates.append(col)
     
+    
     tr_data = {}
+    hashes = []
+    fingerprints = []
     for tr in data:
         hash_base = "|".join((tr[hc] for hc in hash_cols))
         hash = hashlib.sha256(hash_base.encode()).hexdigest()
@@ -50,7 +52,8 @@ async def parse_otp_szep(file:UploadFile, db, import_id:int, account_id:int) -> 
         query = insert(models.RawImport).values(account_id=account_id,
                                                 raw_data=raw_data,
                                                 row_hash=row_hash,
-                                                import_id=import_id)
-        await db.execute(query)
+                                                import_id=import_id).returning(models.RawImport.id)
+        res = await db.execute(query)
+        raw_import_id = res.scalar_one()
 
     return {"success":True, "row_count":len(fingerprints), "imported_count":len(fingerprints)-len(existings), "min_date":min(dates), "max_date":max(dates)}
