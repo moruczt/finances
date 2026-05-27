@@ -4,16 +4,17 @@ import json
 
 from openpyxl import load_workbook
 from fastapi import UploadFile
-from sqlalchemy import select
+from sqlalchemy import select, insert
 
 import models
 from utils import log
 
 
-def parse_otp_szep(file:UploadFile, db, import_id:int):
+async def parse_otp_szep(file:UploadFile, db, import_id:int, account_id:int) -> dict:
     hashes = []
     fingerprints = []
     hash_cols = ["Dátum","Alszámla","Jóváírás","Terhelés","Ellenoldali név","Jogcím"]
+    dates = []
     with BytesIO(file.read()) as f:
         wb = load_workbook(f, read_only=True, data_only=True, keep_links=False)
         ws = wb[wb.sheetnames[0]]
@@ -26,6 +27,8 @@ def parse_otp_szep(file:UploadFile, db, import_id:int):
                     headers[c] = col
                 else:
                     data.append({headers[c]:col})
+                    if headers[c] == "Dátum":
+                        dates.append(col)
     
     tr_data = {}
     for tr in data:
@@ -38,10 +41,16 @@ def parse_otp_szep(file:UploadFile, db, import_id:int):
         tr_data[fingerprint] = json.dumps(tr)
 
     query = select(models.RawImport.row_hash).where(models.RawImport.row_hash.in_(fingerprints))
-    existings = set(db.execute(query).scalars())
+    existings = set(await db.execute(query).scalars())
     for row_hash, raw_data in tr_data.items():
         if row_hash in existings:
             log(f"HASH FOUND: {row_hash}\n{raw_data}")
             continue
 
-    return
+        query = insert(models.RawImport).values(account_id=account_id,
+                                                raw_data=raw_data,
+                                                row_hash=row_hash,
+                                                import_id=import_id)
+        await db.execute(query)
+
+    return {"success":True, "row_count":len(fingerprints), "imported_count":len(fingerprints)-len(existings), "min_date":min(dates), "max_date":max(dates)}

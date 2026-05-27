@@ -36,7 +36,7 @@ def setup_logging():
         ]
     )
 
-def log(msg:str, level="info"):
+def log(msg:str, level:str="info"):
     levels = {
         "debug": logger.debug,
         "info": logger.info,
