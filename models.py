@@ -97,7 +97,7 @@ class Entry(Base):
     __tablename__ = "entries"
 
     id = Column(Integer, primary_key=True)
-    transaction_id = Column(Integer, ForeignKey("transactions.id"), nullable=False)
+    transaction_id = Column(Integer, ForeignKey("transactions.id", ondelete="CASCADE"), nullable=False)
     account_id = Column(Integer, ForeignKey("accounts.id"), nullable=False)
     raw_import_id = Column(Integer, ForeignKey("raw_imports.id"), nullable=True)
     amount_huf = Column(Numeric(precision=20, scale=4), nullable=False)
