@@ -1,6 +1,7 @@
 from io import BytesIO
 import hashlib
 import json
+import re
 
 from openpyxl import load_workbook
 from fastapi import UploadFile
@@ -12,8 +13,8 @@ from utils import log
 
 async def parse_otp_szep(file:UploadFile, db, import_id:int, account_id:int) -> dict:
     hash_cols = ["Dátum","Alszámla","Jóváírás","Terhelés","Ellenoldali név","Jogcím"]
+    tr_cols = {"date":"Dátum"}
 
-    dates = []
     headers = {}
     data = []
     with BytesIO(file.read()) as f:
@@ -26,8 +27,6 @@ async def parse_otp_szep(file:UploadFile, db, import_id:int, account_id:int) -> 
                     headers[c] = col
                 else:
                     data.append({headers[c]:col})
-                    if headers[c] == "Dátum":
-                        dates.append(col)
     
     
     tr_data = {}
@@ -44,10 +43,15 @@ async def parse_otp_szep(file:UploadFile, db, import_id:int, account_id:int) -> 
 
     query = select(models.RawImport.row_hash).where(models.RawImport.row_hash.in_(fingerprints))
     existings = set(await db.execute(query).scalars())
+
+    query = select(models.Rule.target_account_id, models.Rule.conditions).where(models.Rule.account_id==account_id)
+    rules = {r["target_account_id"]:json.loads(r["conditions"]) for r in await db.execute(query).mappings().all()}
+    dates = []
     for row_hash, raw_data in tr_data.items():
         if row_hash in existings:
             log(f"HASH FOUND: {row_hash}\n{raw_data}")
             continue
+        dates.append(raw_data[tr_cols["date"]])
 
         query = insert(models.RawImport).values(account_id=account_id,
                                                 raw_data=raw_data,
@@ -55,5 +59,55 @@ async def parse_otp_szep(file:UploadFile, db, import_id:int, account_id:int) -> 
                                                 import_id=import_id).returning(models.RawImport.id)
         res = await db.execute(query)
         raw_import_id = res.scalar_one()
+
+        query = select(models.AccountConfig.account_id)
+        res = await db.execute(query)
+        transfer_account_ids = res.scalars()
+
+        categorized = False
+        match_count = 0
+        for target_account_id, conditions in rules.items():
+            fail = False
+            for col, val in conditions.items():
+                if not re.search(val, raw_data[col]):
+                    fail = True
+                    break
+            if not fail:
+                match_count += 1
+                if categorized:
+                    continue
+                categorized = True
+                if target_account_id in transfer_account_ids:
+                    pass
+                else:
+                    query = insert(models.Transaction).values(date=raw_data[tr_cols["date"]],
+                                                            description="",
+                                                            source="import").returning(models.Transaction.id)
+                    res = await db.execute(query)
+                    tr_id = res.scalar_one()
+                    entries_data = [{"transaction_id":tr_id, "account_id":account_id, "raw_import_id":raw_import_id,
+                                    "amount_huf":(raw_data["Jóváírás"] or 0) - (raw_data["Terhelés"] or 0), "amount_orig":(raw_data["Jóváírás"] or 0) - (raw_data["Terhelés"] or 0)},
+                                    {"transaction_id":tr_id, "account_id":target_account_id, "raw_import_id":raw_import_id,
+                                    "amount_huf":-((raw_data["Jóváírás"] or 0) - (raw_data["Terhelés"] or 0)), "amount_orig":-((raw_data["Jóváírás"] or 0) - (raw_data["Terhelés"] or 0))}]
+                    query = insert(models.Entry).values(entries_data)
+                    await db.execute(query)
+
+
+        
+        if not categorized:
+            query = insert(models.Transaction).values(date=raw_data[tr_cols["date"]],
+                                                      description="",
+                                                      source="import",
+                                                      is_temporary="true").returning(models.Transaction.id)
+            res = await db.execute(query)
+            tr_id = res.scalar_one()
+
+            entries_data = [{"transaction_id":tr_id, "account_id":account_id, "raw_import_id":raw_import_id,
+                             "amount_huf":(raw_data["Jóváírás"] or 0) - (raw_data["Terhelés"] or 0), "amount_orig":(raw_data["Jóváírás"] or 0) - (raw_data["Terhelés"] or 0)},
+                            {"transaction_id":tr_id, "account_id":30, "raw_import_id":raw_import_id,
+                             "amount_huf":-((raw_data["Jóváírás"] or 0) - (raw_data["Terhelés"] or 0)), "amount_orig":-((raw_data["Jóváírás"] or 0) - (raw_data["Terhelés"] or 0))}]
+            query = insert(models.Entry).values(entries_data)
+            await db.execute(query)
+
 
     return {"success":True, "row_count":len(fingerprints), "imported_count":len(fingerprints)-len(existings), "min_date":min(dates), "max_date":max(dates)}
