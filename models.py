@@ -89,7 +89,7 @@ class Transaction(Base):
     date = Column(DateTime, nullable=False, index=True)
     description = Column(String(255))
     source = Column(String(255))
-    is_temporary = Column(Boolean, nullable=False, server_default=False)
+    is_temporary = Column(Boolean, nullable=False, server_default="false")
 
     entries = relationship("Entry", back_populates="transaction")
 
