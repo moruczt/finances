@@ -11,6 +11,9 @@ import models
 from utils import log
 
 
+UNKNOWN_ACCOUNT_ID = 30
+
+
 async def parse_otp_szep(file:UploadFile, db, import_id:int, account_id:int) -> dict:
     hash_cols = ["Dátum","Alszámla","Jóváírás","Terhelés","Ellenoldali név","Jogcím"]
     tr_cols = {"date":"Dátum"}
@@ -43,9 +46,20 @@ async def parse_otp_szep(file:UploadFile, db, import_id:int, account_id:int) -> 
         fingerprint = hashlib.sha256(fingerprint_base.encode()).hexdigest()
         fingerprints.append(fingerprint)
         tr_data[fingerprint] = {"raw_data":tr,
-                                "raw_data_json":json.dumps(tr),
-                                "tr_data":{},
-                                "entry_data":{}}
+                                "tr_data":{"date":tr[tr_cols["date"]],
+                                           "description":"",
+                                           "source":"import",
+                                           "is_temporary":False},
+                                "entries_data":[{"transaction_id":None,
+                                                 "account_id":account_id,
+                                                 "raw_import_id":None,
+                                                 "amount_huf":(tr["Jóváírás"] or 0) - (tr["Terhelés"] or 0),
+                                                 "amount_orig":(tr["Jóváírás"] or 0) - (tr["Terhelés"] or 0)},
+                                                {"transaction_id":None,
+                                                 "account_id":None,
+                                                 "raw_import_id":None,
+                                                 "amount_huf":-((tr["Jóváírás"] or 0) - (tr["Terhelés"] or 0)),
+                                                 "amount_orig":-((tr["Jóváírás"] or 0) - (tr["Terhelés"] or 0))}]}
 
     query = select(models.RawImport.row_hash).where(models.RawImport.row_hash.in_(fingerprints))
     existings = set((await db.execute(query)).scalars())
@@ -53,29 +67,28 @@ async def parse_otp_szep(file:UploadFile, db, import_id:int, account_id:int) -> 
     query = select(models.Rule.target_account_id, models.Rule.conditions).where(models.Rule.account_id==account_id)
     rules = {r["target_account_id"]:json.loads(r["conditions"]) for r in (await db.execute(query)).mappings().all()}
     dates = []
-    for row_hash, raw_data in tr_data.items():
+    for row_hash, data in tr_data.items():
+        raw_data_json = json.dumps(data["raw_data"])
         if row_hash in existings:
-            log(f"HASH FOUND: {row_hash}\n{raw_data['raw_data_json']}")
+            log(f"HASH FOUND: {row_hash}\n{raw_data_json}")
             continue
-        dates.append(raw_data["raw_data"][tr_cols["date"]])
+        dates.append(data["tr_data"]["date"])
 
         query = insert(models.RawImport).values(account_id=account_id,
-                                                raw_data=raw_data["raw_data_json"],
+                                                raw_data=raw_data_json,
                                                 row_hash=row_hash,
                                                 import_id=import_id).returning(models.RawImport.id)
-        res = await db.execute(query)
-        raw_import_id = res.scalar_one()
+        raw_import_id = (await db.execute(query)).scalar_one()
 
         query = select(models.AccountConfig.account_id)
-        res = await db.execute(query)
-        transfer_account_ids = res.scalars()
+        transfer_account_ids = (await db.execute(query)).scalars()
 
         categorized = False
         match_count = 0
         for target_account_id, conditions in rules.items():
             fail = False
             for col, val in conditions.items():
-                if not re.search(val, raw_data["raw_data"][col]):
+                if not re.search(val, data["raw_data"][col]):
                     fail = True
                     break
             if not fail:
@@ -86,33 +99,24 @@ async def parse_otp_szep(file:UploadFile, db, import_id:int, account_id:int) -> 
                 if target_account_id in transfer_account_ids:
                     pass
                 else:
-                    query = insert(models.Transaction).values(date=raw_data["raw_data"][tr_cols["date"]],
-                                                            description="",
-                                                            source="import").returning(models.Transaction.id)
-                    res = await db.execute(query)
-                    tr_id = res.scalar_one()
-                    entries_data = [{"transaction_id":tr_id, "account_id":account_id, "raw_import_id":raw_import_id,
-                                    "amount_huf":(raw_data["raw_data"]["Jóváírás"] or 0) - (raw_data["raw_data"]["Terhelés"] or 0), "amount_orig":(raw_data["raw_data"]["Jóváírás"] or 0) - (raw_data["raw_data"]["Terhelés"] or 0)},
-                                    {"transaction_id":tr_id, "account_id":target_account_id, "raw_import_id":raw_import_id,
-                                    "amount_huf":-((raw_data["raw_data"]["Jóváírás"] or 0) - (raw_data["raw_data"]["Terhelés"] or 0)), "amount_orig":-((raw_data["raw_data"]["Jóváírás"] or 0) - (raw_data["raw_data"]["Terhelés"] or 0))}]
-                    query = insert(models.Entry).values(entries_data)
+                    query = insert(models.Transaction).values(data["tr_data"]).returning(models.Transaction.id)
+                    tr_id = (await db.execute(query)).scalar_one()
+
+                    [ed.update(transaction_id=tr_id, raw_import_id=raw_import_id) for ed in data["entries_data"]]
+                    data["entries_data"][-1]["account_id"] = target_account_id
+                    query = insert(models.Entry).values(data["entries_data"])
                     await db.execute(query)
 
 
         
         if not categorized:
-            query = insert(models.Transaction).values(date=raw_data["raw_data"][tr_cols["date"]],
-                                                      description="",
-                                                      source="import",
-                                                      is_temporary=True).returning(models.Transaction.id)
-            res = await db.execute(query)
-            tr_id = res.scalar_one()
+            data["tr_data"]["is_temporary"] = True
+            query = insert(models.Transaction).values(data["tr_data"]).returning(models.Transaction.id)
+            tr_id = (await db.execute(query)).scalar_one()
 
-            entries_data = [{"transaction_id":tr_id, "account_id":account_id, "raw_import_id":raw_import_id,
-                             "amount_huf":(raw_data["raw_data"]["Jóváírás"] or 0) - (raw_data["raw_data"]["Terhelés"] or 0), "amount_orig":(raw_data["raw_data"]["Jóváírás"] or 0) - (raw_data["raw_data"]["Terhelés"] or 0)},
-                            {"transaction_id":tr_id, "account_id":30, "raw_import_id":raw_import_id,
-                             "amount_huf":-((raw_data["raw_data"]["Jóváírás"] or 0) - (raw_data["raw_data"]["Terhelés"] or 0)), "amount_orig":-((raw_data["raw_data"]["Jóváírás"] or 0) - (raw_data["raw_data"]["Terhelés"] or 0))}]
-            query = insert(models.Entry).values(entries_data)
+            [ed.update(transaction_id=tr_id, raw_import_id=raw_import_id) for ed in data["entries_data"]]
+            data["entries_data"][-1]["account_id"] = UNKNOWN_ACCOUNT_ID
+            query = insert(models.Entry).values(data["entries_data"])
             await db.execute(query)
 
     min_date = min(dates) if dates else None
