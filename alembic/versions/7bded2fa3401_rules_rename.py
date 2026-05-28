@@ -33,14 +33,6 @@ def upgrade() -> None:
     )
     op.drop_table('rule')
     # ### end Alembic commands ###
-    
-    # account_table = sa.table("rules",
-    #                          sa.column("account_id", sa.Integer),
-    #                          sa.column("target_account_id", sa.Integer),
-    #                          sa.column("conditions", sa.JSON))
-    # op.bulk_insert(account_table, [
-    #                 {"account_id":8,"target_account_id":1,"conditions":"Assets"},
-    # ])
 
     op.execute(
         "UPDATE account_configs SET raw_extension = 'xlsx' WHERE id = 7"

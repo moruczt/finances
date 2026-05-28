@@ -6,6 +6,7 @@ Create Date: 2026-05-08 08:38:45.766606
 
 """
 from typing import Sequence, Union
+import os
 
 from alembic import op
 import sqlalchemy as sa
@@ -35,8 +36,9 @@ def upgrade() -> None:
     user_table = sa.table("users",
                         sa.column("username", sa.String),
                         sa.column("password", sa.String))
+    admin_pw = os.getenv("ADMIN_PW_HASH","")
     op.bulk_insert(user_table, [
-                    {"username":"moruczt","password":"$argon2id$v=19$m=65536,t=3,p=4$e2/tfc/5n3OOEWLMuRfiHA$KDvCmFs0GT7onCgu4hxL6rsPrgB6ytH5ZIzAyWfhfkU"},
+                    {"username":"moruczt","password":admin_pw},
                     ])
 
 

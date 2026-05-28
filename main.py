@@ -76,12 +76,12 @@ async def page_import(request:Request, db:DB, user:AuthedUser):
     query = select(models.Account.id, models.Account.name).join(models.AccountConfig, models.AccountConfig.account_id==models.Account.id)
     res = await db.execute(query)
     accounts = {a["id"]:a["name"] for a in res.mappings().all()}
-    importLog = ""
+    import_log = ""
     return templates.TemplateResponse(
                 request=request,
                 name="import.html",
                 context={"accounts":accounts,
-                         "importLog":importLog})
+                         "import_log":import_log})
 
 @app.get("/manual")
 async def page_manual():
