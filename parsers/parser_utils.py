@@ -1,4 +1,3 @@
-import hashlib
 import json
 import re
 
@@ -25,7 +24,6 @@ async def import_trs(data:DataFrame, db:AsyncSession, import_id:int, account_id:
     query = select(models.RawImport.row_hash).where(models.RawImport.row_hash.in_(data["_fingerprint"].tolist()))
     existings = set((await db.execute(query)).scalars())
     orig_size = data.shape[0]
-    # log(existings)
     data = data[~data["_fingerprint"].isin(existings)]
     if not data.size:
         return {"success":True, "row_count":orig_size, "imported_count":0, "min_date":None, "max_date":None}
