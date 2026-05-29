@@ -14,6 +14,7 @@ from sqlalchemy import select, insert, update
 import models
 import utils
 from utils import DB, REDIS, AuthedUser, log
+from parsers.parser_utils import import_trs
 
 utils.setup_logging()
 app = FastAPI(root_path="/finances", title="Finances")
@@ -115,8 +116,8 @@ async def import_raw(account_id:int, db:DB, file:Annotated[UploadFile,File(...)]
     res = await db.execute(query)
     import_id = res.scalar_one()
 
-    imported = await parser(file, db, import_id, account_id)
-
+    data = await parser(file)
+    imported = await import_trs(data, db, import_id, account_id)
     query = update(models.Import).values(**imported).where(models.Import.id==import_id)
     await db.execute(query)
 
