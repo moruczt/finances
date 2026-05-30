@@ -99,14 +99,6 @@ async def page_imports(request:Request, db:DB, user:AuthedUser):
 
 @app.get("/transactions", response_class=HTMLResponse)
 async def page_imports(request:Request, db:DB, user:AuthedUser):
-    # query = select(models.Import.created_at,
-    #                models.Import.file_name,
-    #                models.Import.row_count,
-    #                models.Import.imported_count,
-    #                models.Import.min_date,
-    #                models.Import.max_date,
-    #                models.Account.name).join(models.Account, models.Import.account_id==models.Account.id).order_by(desc(models.Import.created_at))
-    # imports = (await db.execute(query)).mappings().all()
     return templates.TemplateResponse(
                 request=request,
                 name="transactions.html",
