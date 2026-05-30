@@ -29,7 +29,8 @@ def upgrade() -> None:
     op.alter_column('transactions', 'direction',
                existing_type=sa.VARCHAR(length=255),
                type_=sa.Enum('INCOMING', 'OUTGOING', 'TRANSFER', name='transactiondirection'),
-               existing_nullable=False)
+               existing_nullable=False,
+               postgresql_using='direction::transactiondirection')
     # ### end Alembic commands ###
 
 
