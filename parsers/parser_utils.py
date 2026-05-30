@@ -45,6 +45,7 @@ async def import_trs(data:DataFrame, db:AsyncSession, import_id:int, account_id:
     data["_target_account_id"] = data.apply(lambda tr: is_match(tr, rules), axis=1)
 
     for _, tr in data.iterrows():
+        direction = None
         if tr["_target_account_id"] in transfer_account_ids:
             ##TODO: TEST IT !!!
             query = select(models.Entry.id).join(models.Transaction, models.Transaction.id==models.Entry.transaction_id).where(models.Transaction.is_temporary==True,
@@ -56,16 +57,19 @@ async def import_trs(data:DataFrame, db:AsyncSession, import_id:int, account_id:
                 query = update(models.Entry).values(raw_import_id=tr["_raw_id"]).where(models.Entry.id==entry_id)
                 await db.execute(query)
                 continue
+            direction = "transfer"
             
         query = insert(models.Transaction).values(date=tr["_date"],
-                                                    description=tr["_description"],
-                                                    source="import",
-                                                    is_temporary=tr["_target_account_id"]==UNKNOWN_ACCOUNT_ID).returning(models.Transaction.id)
+                                                  description=tr["_description"],
+                                                  direction=direction or ("incoming" if tr["_amount"] > 0 else "outgoing"),
+                                                  source="import",
+                                                  is_temporary=tr["_target_account_id"]==UNKNOWN_ACCOUNT_ID).returning(models.Transaction.id)
         tr["_tr_id"] = (await db.execute(query)).scalar_one()
 
         entry_data = [{"transaction_id":tr["_tr_id"],
                         "account_id":account_id,
                         "raw_import_id":tr["_raw_id"],
+                        "is_base":True,
                         "amount_huf":tr["_amount"],
                         "amount_orig":tr["_amount_orig"],
                         "exchange_rate":tr["_exchange_rate"],
@@ -73,6 +77,7 @@ async def import_trs(data:DataFrame, db:AsyncSession, import_id:int, account_id:
                       {"transaction_id":tr["_tr_id"],
                         "account_id":tr["_target_account_id"],
                         "raw_import_id":tr["_raw_id"],
+                        "is_base":False,
                         "amount_huf":-tr["_amount"],
                         "amount_orig":-tr["_amount_orig"],
                         "exchange_rate":tr["_exchange_rate"],
