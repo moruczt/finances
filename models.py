@@ -22,6 +22,11 @@ class AccountSide(enum.Enum):
     Expenses = "Expenses"
     Equity = "Equity"
 
+class TransactionDirection(enum.Enum):
+    INCOMING = "incoming"
+    OUTGOING = "outgoing"
+    TRANSFER = "transfer"
+
 class Account(Base):
     __tablename__ = "accounts"
 
@@ -89,7 +94,7 @@ class Transaction(Base):
     date = Column(DateTime, nullable=False, index=True)
     description = Column(String(255))
     source = Column(String(255), nullable=False)
-    direction = Column(String(255), nullable=False)
+    direction = Column(Enum(TransactionDirection), nullable=False)
     is_temporary = Column(Boolean, nullable=False, server_default="false")
 
     entries = relationship("Entry", back_populates="transaction")
@@ -101,7 +106,7 @@ class Entry(Base):
     transaction_id = Column(Integer, ForeignKey("transactions.id", ondelete="CASCADE"), nullable=False)
     account_id = Column(Integer, ForeignKey("accounts.id"), nullable=False)
     raw_import_id = Column(Integer, ForeignKey("raw_imports.id"), nullable=True)
-    side = Column(String(255), nullable=False)
+    is_base = Column(Boolean, nullable=False)
     amount_huf = Column(Numeric(precision=20, scale=4), nullable=False)
     amount_orig = Column(Numeric(precision=20, scale=4), nullable=False)
     exchange_rate = Column(Numeric(precision=20, scale=4), nullable=False, server_default="1")
