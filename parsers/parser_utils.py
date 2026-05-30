@@ -1,7 +1,7 @@
 import json
 import re
 
-from sqlalchemy import select, insert
+from sqlalchemy import select, insert, update
 from sqlalchemy.ext.asyncio.session import AsyncSession
 import pandas as pd
 from pandas import DataFrame
@@ -46,7 +46,17 @@ async def import_trs(data:DataFrame, db:AsyncSession, import_id:int, account_id:
 
     for _, tr in data.iterrows():
         if tr["_target_account_id"] in transfer_account_ids:
-            continue
+            ##TODO: TEST IT !!!
+            query = select(models.Entry.id).join(models.Transaction, models.Transaction.id==models.Entry.transaction_id).where(models.Transaction.is_temporary==True,
+                                                  models.Transaction.date==tr["_date"],
+                                                  models.Entry.account_id==account_id,
+                                                  models.Entry.amount_huf==-tr["_amount_huf"])
+            entry_id = (await db.execute(query)).scalar()
+            if entry_id:
+                query = update(models.Entry).values(raw_import_id=tr["_raw_id"]).where(models.Entry.id==entry_id)
+                await db.execute(query)
+                continue
+            
         query = insert(models.Transaction).values(date=tr["_date"],
                                                     description=tr["_description"],
                                                     source="import",

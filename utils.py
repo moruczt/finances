@@ -73,5 +73,4 @@ async def auth_session(request:Request, redis:REDIS) -> str:
     return username
 
 
-
 AuthedUser = Annotated[str, Depends(auth_session)]

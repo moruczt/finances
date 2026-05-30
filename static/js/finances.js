@@ -11,18 +11,14 @@ async function request(url, method="GET", data=null, onload=null, contentType="j
             }
         }
         const response = await fetch(url, options);
-
-        if (!response.ok) throw new Error('Request failed');
-
         const resp = await response.json();
-        if (resp.msg) {
-            showToast(resp.msg, resp.msgType, resp.msgDur);
-        }
+        if (resp.msg) showToast(resp.msg, resp.msgType, resp.msgDur);
 
         onload(resp);
     } catch (error) {
         console.error("Request Error:", error.message);
-        showToast(error.message);
+        showToast("Unexpected error");
+        onload({"success":false});
         throw error;
     }
 }
@@ -50,4 +46,56 @@ function showToast(msg, type='error', duration=4000) {
         clearTimeout(timeout);
         removeToast();
     }
+}
+
+
+function showConfirm(title, message, confirmText ) {
+    return new Promise((resolve) => {
+        const modalHtml = `
+            <div id="customModalOverlay" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm opacity-0 transition-opacity duration-200">
+                <div id="customModalCard" class="w-full max-w-sm bg-white rounded-2xl shadow-xl border border-gray-100 p-6 transform scale-95 opacity-0 transition-all duration-200">
+                    <h3 class="text-base font-bold text-gray-900">${title}</h3>
+                    <p class="text-xs text-gray-500 mt-2 leading-relaxed">${message}</p>
+                    
+                    <div class="flex items-center justify-end gap-2 mt-6">
+                        <button id="modalCancelBtn" class="px-3.5 py-2 rounded-xl border border-gray-200 text-xs font-semibold text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer">
+                            Cancel
+                        </button>
+                        <button id="modalConfirmBtn" class="px-3.5 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-xs font-semibold text-white shadow-sm transition-colors cursor-pointer">
+                            ${confirmText || 'Confirm'}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+        const overlay = document.getElementById('customModalOverlay');
+        const card = document.getElementById('customModalCard');
+        const cancelBtn = document.getElementById('modalCancelBtn');
+        const confirmBtn = document.getElementById('modalConfirmBtn');
+
+        const closeModal = (resultValue) => {
+            card.classList.add('scale-95', 'opacity-0');
+            overlay.classList.add('opacity-0');
+            setTimeout(() => {
+                overlay.remove();
+                resolve(resultValue);
+            }, 200);
+        };
+
+        requestAnimationFrame(() => {
+            overlay.classList.remove('opacity-0');
+            card.classList.remove('scale-95', 'opacity-0');
+        });
+
+        confirmBtn.addEventListener('click', () => {
+            confirmBtn.disabled = true;
+            confirmBtn.innerText = "Processing...";
+            closeModal(true);
+        });
+
+        cancelBtn.addEventListener('click', () => closeModal(false));
+        overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(false); });
+    });
 }

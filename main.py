@@ -3,13 +3,14 @@ from dotenv import load_dotenv
 load_dotenv()
 import uuid
 import importlib
+import datetime as dt
 from typing import Annotated
 
 from fastapi import FastAPI, Depends, Request, UploadFile, File, Form
 from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
-from sqlalchemy import select, insert, update
+from sqlalchemy import select, insert, update, delete, desc, text
 
 import models
 import utils
@@ -21,7 +22,8 @@ app = FastAPI(root_path="/finances", title="Finances")
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 def context_processors(request:Request):
-    return {"user":getattr(request.state, "user", "")}
+    return {"user":getattr(request.state, "user", ""),
+            "now":dt.datetime.today}
 templates = Jinja2Templates(directory="templates", context_processors=[context_processors])
 
 
@@ -33,8 +35,7 @@ async def auth_exception_handler(request:Request, exc:utils.AuthenticationRequir
         return RedirectResponse(url=request.url_for("page_login").include_query_params(next=current_url), status_code=303)
     else:
         return JSONResponse(status_code=401,
-                            content={"detail":"Not authenticated",
-                                     "action":"redirect_to_login"})
+                            content={"success":False, "msg":"Not authenticated", "msgType":"error", "msgDur":4000})
 
 
 @app.get("/")
@@ -75,14 +76,42 @@ async def logout(request:Request, redis:REDIS):
 @app.get("/import", response_class=HTMLResponse)
 async def page_import(request:Request, db:DB, user:AuthedUser):
     query = select(models.Account.id, models.Account.name).join(models.AccountConfig, models.AccountConfig.account_id==models.Account.id)
-    res = await db.execute(query)
-    accounts = {a["id"]:a["name"] for a in res.mappings().all()}
-    import_log = ""
+    accounts = {a["id"]:a["name"] for a in (await db.execute(query)).mappings().all()}
     return templates.TemplateResponse(
                 request=request,
                 name="import.html",
-                context={"accounts":accounts,
-                         "import_log":import_log})
+                context={"accounts":accounts})
+
+@app.get("/imports", response_class=HTMLResponse)
+async def page_imports(request:Request, db:DB, user:AuthedUser):
+    query = select(models.Import.created_at,
+                   models.Import.file_name,
+                   models.Import.row_count,
+                   models.Import.imported_count,
+                   models.Import.min_date,
+                   models.Import.max_date,
+                   models.Account.name).join(models.Account, models.Import.account_id==models.Account.id).order_by(desc(models.Import.created_at))
+    imports = (await db.execute(query)).mappings().all()
+    return templates.TemplateResponse(
+                request=request,
+                name="imports.html",
+                context={"imports":imports})
+
+@app.get("/transactions", response_class=HTMLResponse)
+async def page_imports(request:Request, db:DB, user:AuthedUser):
+    # query = select(models.Import.created_at,
+    #                models.Import.file_name,
+    #                models.Import.row_count,
+    #                models.Import.imported_count,
+    #                models.Import.min_date,
+    #                models.Import.max_date,
+    #                models.Account.name).join(models.Account, models.Import.account_id==models.Account.id).order_by(desc(models.Import.created_at))
+    # imports = (await db.execute(query)).mappings().all()
+    return templates.TemplateResponse(
+                request=request,
+                name="transactions.html",
+                context={})
+
 
 @app.get("/manual")
 async def page_manual():
@@ -95,7 +124,7 @@ async def page_categorise():
 
 ## APIs
 @app.post("/api/accounts/{account_id}/import")
-async def import_raw(account_id:int, db:DB, file:Annotated[UploadFile,File(...)]):
+async def import_raw(account_id:int, request:Request, db:DB, file:Annotated[UploadFile,File(...)], user:AuthedUser):
     query = select(models.AccountConfig.parser, models.AccountConfig.raw_extension).join(models.Account, models.Account.id==models.AccountConfig.account_id).where(models.Account.id==account_id)
     res = await db.execute(query)
     account_config = res.mappings().first()
@@ -121,7 +150,22 @@ async def import_raw(account_id:int, db:DB, file:Annotated[UploadFile,File(...)]
     query = update(models.Import).values(**imported).where(models.Import.id==import_id)
     await db.execute(query)
 
+    import_log = templates.env.get_template("snippets/import_log.html").render(imported=imported, now=dt.datetime.today)
+    
+    await db.commit()
+    return {"success":True, "msg":"File imported successfully", "msgType":"success", "msgDur":4000, "result":{"import_log":import_log}}
+    
+
+@app.delete("/api/wipe")
+async def wipe_db(db:DB, user:AuthedUser):
+    await db.execute(delete(models.Transaction))
+    await db.execute(delete(models.RawImport))
+    await db.execute(delete(models.Import))
+    await db.execute(text("SELECT setval(pg_get_serial_sequence('entries', 'id'), 1, false);"))
+    await db.execute(text("SELECT setval(pg_get_serial_sequence('transactions', 'id'), 1, false);"))
+    await db.execute(text("SELECT setval(pg_get_serial_sequence('raw_imports', 'id'), 1, false);"))
+    await db.execute(text("SELECT setval(pg_get_serial_sequence('imports', 'id'), 1, false);"))
     await db.commit()
 
-    return {"success":True, "msg":"File imported successfully", "msgType":"success", "msgDur":4000}
+    return {"success":True, "msg":"Database was successfully wiped", "msgType":"success", "msgDur":4000, "result":{}}
     

@@ -88,7 +88,8 @@ class Transaction(Base):
     id = Column(Integer, primary_key=True)
     date = Column(DateTime, nullable=False, index=True)
     description = Column(String(255))
-    source = Column(String(255))
+    source = Column(String(255), nullable=False)
+    direction = Column(String(255), nullable=False)
     is_temporary = Column(Boolean, nullable=False, server_default="false")
 
     entries = relationship("Entry", back_populates="transaction")
@@ -100,10 +101,11 @@ class Entry(Base):
     transaction_id = Column(Integer, ForeignKey("transactions.id", ondelete="CASCADE"), nullable=False)
     account_id = Column(Integer, ForeignKey("accounts.id"), nullable=False)
     raw_import_id = Column(Integer, ForeignKey("raw_imports.id"), nullable=True)
+    side = Column(String(255), nullable=False)
     amount_huf = Column(Numeric(precision=20, scale=4), nullable=False)
     amount_orig = Column(Numeric(precision=20, scale=4), nullable=False)
     exchange_rate = Column(Numeric(precision=20, scale=4), nullable=False, server_default="1")
     currency = Column(String(3), nullable=False, server_default="HUF")
-
+    
     transaction = relationship("Transaction", back_populates="entries")
     account = relationship("Account", back_populates="entries")
