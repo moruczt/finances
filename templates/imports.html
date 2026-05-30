@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %} - Imports{% endblock %}
+
+{% block scripts %}
+    <script defer src="{{ url_for('static', path='/js/imports.js').path }}"></script>
+{% endblock %}
+
+{% block content %}
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-6 border-b border-gray-100 mb-8 gap-4">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900 tracking-tight">Import Pipeline History</h1>
+                <p class="text-sm text-gray-500 mt-1">Audit log of all uploaded bank statements and parsing execution runs.</p>
+            </div>
+            <a href="/import" class="inline-flex items-center justify-center px-4 py-2 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 transition-colors rounded-xl shadow-sm gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                Upload New File
+            </a>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-gray-50/75 border-b border-gray-100 text-[11px] font-bold uppercase tracking-wider text-gray-400 select-none">
+                            <th class="py-3.5 px-6">Timestamp</th>
+                            <th class="py-3.5 px-4">Target Account</th>
+                            <th class="py-3.5 px-4">Filename</th>
+                            <th class="py-3.5 px-4 text-center">Records (New/Total)</th>
+                            <th class="py-3.5 px-4">Data Bookends (Date Range)</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-50 text-sm text-gray-600">
+                        {% for import_data in imports %}
+                            <tr class="hover:bg-gray-50/50 transition-colors">
+                                <td class="py-4 px-6 font-mono text-xs text-gray-400">{{ import_data["created_at"].replace(microsecond=0) }}</td>
+                                <td class="py-4 px-4 font-semibold text-gray-800">
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+                                        {{ import_data["name"] }}
+                                    </div>
+                                </td>
+                                <td class="py-4 px-6 font-mono text-xs text-gray-400">{{ import_data["file_name"] }}</td>
+                                <td class="py-4 px-4 text-center">
+                                    <span class="font-mono bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded text-xs font-semibold">+{{ import_data["imported_count"] }}</span>
+                                    <span class="text-gray-300 mx-1">/</span>
+                                    <span class="font-mono text-gray-500">{{ import_data["row_count"] }}</span>
+                                </td>
+                                <td class="py-4 px-4">
+                                    <div class="flex items-center gap-1.5 text-xs text-gray-500 font-mono">
+                                        <span class="text-gray-700 font-semibold">{% if import_data["min_date"] %}{{ import_data["min_date"].strftime("%Y-%m-%d") }}{% endif %}</span>
+                                        <span class="text-gray-300">→</span>
+                                        <span class="text-gray-700 font-semibold">{% if import_data["max_date"] %}{{ import_data["max_date"].strftime("%Y-%m-%d") }}{% endif %}</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="mt-16 pt-6 border-t border-gray-100 flex items-center justify-end text-xs text-gray-400">
+            <button 
+                type="button" 
+                onclick="wipeDatabase()"
+                class="px-3 py-1.5 rounded-lg border border-gray-200 hover:border-red-200 text-gray-400 hover:text-red-600 hover:bg-red-50/30 transition-all font-medium cursor-pointer"
+            >
+                Wipe System Data
+            </button>
+        </div>
+</div>
+    </div>
+{% endblock %}

@@ -8,7 +8,14 @@
 
 {% block content %}
     <div class="min-h-screen flex flex-col items-center justify-center sm:p-6 bg-gray-50">
-        <div class="w-full max-w-md bg-white sm:rounded-2xl shadow-xl border-y sm:border border-gray-100 p-6 md:p-8">
+        <div class="w-full max-w-md bg-white sm:rounded-2xl shadow-xl border-y sm:border border-gray-100 p-6 md:p-8 relative">
+            <div class="absolute top-6 right-6 md:top-8 md:right-8">
+                <a href="/imports" class="inline-flex items-center justify-center p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-xl border border-transparent hover:border-gray-100 transition-all title='View Import History'">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
+                    </svg>
+                </a>
+            </div>
             
             <header class="text-center mb-8">
                 <h2 class="text-2xl font-bold text-gray-800">Import Transactions</h2>
@@ -43,17 +50,17 @@
             </div>
         </div>
 
-        <div id="importLog-container" class="w-full max-w-md mt-6 px-4 sm:px-0 opacity-60 hover:opacity-100 transition-opacity">
-            <div class="flex items-center gap-2 mb-3">
-                <div class="h-[1px] flex-grow bg-gray-300"></div>
-                <span class="text-xs font-bold uppercase tracking-widest text-gray-400">Activity Log</span>
-                <div class="h-[1px] flex-grow bg-gray-300"></div>
+        <div id="importLog-container" class="w-full max-w-md mt-6 px-4 sm:px-0 opacity-80 hover:opacity-100 transition-opacity duration-300">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="h-px grow bg-linear-to-r from-transparent to-gray-200"></div>
+                <span class="text-[10px] font-bold uppercase tracking-widest text-gray-400 select-none">Import Log</span>
+                <div class="h-px grow bg-linear-to-l from-transparent to-gray-200"></div>
             </div>
             
-            <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                <pre id="importLog" class="text-[11px] font-mono text-gray-500 leading-relaxed whitespace-pre-wrap overflow-y-auto max-h-40 italic">
-                    {{ import_log or 'No recent activity...' }}
-                </pre>
+            <div id="importLog" class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 text-sm text-gray-600 transition-all">
+                <div class="text-center py-3 text-xs text-gray-400 font-medium italic">
+                    No recent import activity recorded...
+                </div>
             </div>
         </div>
     </div>

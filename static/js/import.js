@@ -19,16 +19,14 @@ async function rawImport(e) {const allowedExtensions = /(\.csv|\.xlsx)$/i;
 
     const onLoad = (resp) => {
         if (resp.success) {
-
+            document.getElementById("importLog").innerHTML = resp.result["import_log"];
         }
         e.target.disabled = false;
         document.getElementById("spinner").classList.add("hidden");
     }
 
-
     request(`/finances/api/accounts/${accountId}/import`,"POST", formData, onLoad, "formData")
     e.target.value = "";
-
 }
 
 
