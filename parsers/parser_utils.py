@@ -1,5 +1,4 @@
 import json
-import re
 
 from sqlalchemy import select, insert, update
 from sqlalchemy.ext.asyncio.session import AsyncSession
@@ -8,16 +7,7 @@ from pandas import DataFrame
 
 import models
 from utils import log
-
-
-UNKNOWN_ACCOUNT_ID = 30
-
-
-def is_match(tr, rules:dict) -> int:
-    for target_account_id, conditions in rules.items():
-        if all(re.search(val, tr[col]) for col, val in conditions.items()):
-            return target_account_id
-    return UNKNOWN_ACCOUNT_ID
+import utils
 
 
 async def import_trs(data:DataFrame, db:AsyncSession, import_id:int, account_id:int):
@@ -28,7 +18,7 @@ async def import_trs(data:DataFrame, db:AsyncSession, import_id:int, account_id:
     if not data.size:
         return {"success":True, "row_count":orig_size, "imported_count":0, "min_date":None, "max_date":None}
     data["_source"] = "import"
-    import_data = data[filter(lambda c: not c.startswith("_"), data.columns)].apply(lambda tr: json.dumps(tr.to_dict()), axis=1).to_frame("raw_data")
+    import_data = data[filter(lambda c: not c.startswith("_"), data.columns)].fillna("").apply(lambda tr: json.dumps(tr.to_dict()), axis=1).to_frame("raw_data")
     import_data["account_id"] = account_id
     import_data["row_hash"] = data["_fingerprint"]
     import_data["import_id"] = import_id
@@ -42,7 +32,7 @@ async def import_trs(data:DataFrame, db:AsyncSession, import_id:int, account_id:
     rules = {r["target_account_id"]:json.loads(r["conditions"]) for r in (await db.execute(query)).mappings().all()}
     query = select(models.AccountConfig.account_id)
     transfer_account_ids = (await db.execute(query)).scalars()
-    data["_target_account_id"] = data.apply(lambda tr: is_match(tr, rules), axis=1)
+    data["_target_account_id"] = data.apply(lambda tr: utils.is_match(tr, rules), axis=1)
 
     for _, tr in data.iterrows():
         direction = None
@@ -57,13 +47,14 @@ async def import_trs(data:DataFrame, db:AsyncSession, import_id:int, account_id:
                 query = update(models.Entry).values(raw_import_id=tr["_raw_id"]).where(models.Entry.id==entry_id)
                 await db.execute(query)
                 continue
-            direction = "transfer"
+            direction = "TRANSFER"
             
         query = insert(models.Transaction).values(date=tr["_date"],
                                                   description=tr["_description"],
-                                                  direction=direction or ("incoming" if tr["_amount"] > 0 else "outgoing"),
+                                                  direction=direction or ("INCOMING" if tr["_amount"] > 0 else "OUTGOING"),
+                                                  source_raw_import_id=tr["_raw_id"],
                                                   source="import",
-                                                  is_temporary=tr["_target_account_id"]==UNKNOWN_ACCOUNT_ID).returning(models.Transaction.id)
+                                                  is_temporary=tr["_target_account_id"]==utils.UNKNOWN_ACCOUNT_ID).returning(models.Transaction.id)
         tr["_tr_id"] = (await db.execute(query)).scalar_one()
 
         entry_data = [{"transaction_id":tr["_tr_id"],

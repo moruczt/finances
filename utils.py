@@ -1,3 +1,8 @@
+import os
+from dotenv import load_dotenv
+load_dotenv()
+import json
+import re
 from dataclasses import dataclass
 from typing import Annotated
 import logging
@@ -7,11 +12,15 @@ from fastapi import Request, Depends, Form
 from redis.asyncio import Redis
 from passlib.context import CryptContext
 from sqlalchemy.orm import Session
-from sqlalchemy import select
+from sqlalchemy.ext.asyncio.session import AsyncSession
+from sqlalchemy import select, insert, update
+from sqlalchemy.orm import selectinload, joinedload
 
 from database import get_db, get_redis
 import models
 
+
+UNKNOWN_ACCOUNT_ID = os.getenv("UNKNOWN_ACCOUNT_ID")
 
 class AuthenticationRequiredException(Exception):
     pass
@@ -74,3 +83,46 @@ async def auth_session(request:Request, redis:REDIS) -> str:
 
 
 AuthedUser = Annotated[str, Depends(auth_session)]
+
+
+def is_match(tr, rules:dict) -> int:
+    for target_account_id, conditions in rules.items():
+        if all(re.search(val, tr[col]) for col, val in conditions.items()):
+            return target_account_id
+    return UNKNOWN_ACCOUNT_ID
+
+async def apply_rule(rule_id:int, db:AsyncSession) -> None:
+    query = select(models.Rule).where(models.Rule.id==rule_id)
+    log(f"Query rule:\n{query}")
+    rule = (await db.execute(query)).scalar_one()
+    log(f"Queried rule:\n{rule}")
+    query = select(models.AccountConfig.account_id)
+    log(f"Query transfer accounts:\n{query}")
+    transfer_account_ids = (await db.execute(query)).scalars()
+    log(f"Queried transfer accounts:\n{transfer_account_ids}")
+
+    query = select(models.RawImport) \
+            .join(models.Entry, models.Entry.raw_import_id==models.RawImport.id) \
+            .where(models.RawImport.account_id==rule.account_id,
+                   models.Entry.account_id==UNKNOWN_ACCOUNT_ID)
+    log(f"Query transactions:\n{query}")
+    transactions = (await db.execute(query)).scalars().all()
+    for tr in transactions:
+        log(f"Transaction:\n{tr}")
+        target_id = is_match(json.loads(tr.raw_data), {rule.target_account_id:json.loads(rule.conditions)})
+        log(f"Target account: {target_id} ({target_id == rule.target_account_id})")
+        if target_id != rule.target_account_id:
+            continue
+        
+        ## Update Transactions:
+        ## - is_temporary = False
+        query = update(models.Transaction).values(is_temporary=False).where(models.Transaction.source_raw_import_id==tr.id)
+        log(f"Update Transaction:\n{query}")
+        await db.execute(query)
+
+        ## Update Entries:
+        ## - account_id = rule.target_account_id
+
+    
+
+        

@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block title %} - Categorize{% endblock %}
+
+{% block scripts %}
+    <script defer src="{{ url_for('static', path='/js/categorize.js').path }}"></script>
+{% endblock %}
+
+{% block content %}
+    <div class="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 py-4 sm:py-6 min-h-screen grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
+        
+        <div class="w-full bg-white rounded-2xl border border-gray-200 shadow-sm flex flex-col overflow-hidden h-87.5 lg:h-[calc(100vh-120px)] lg:sticky lg:top-6">
+            <div class="p-4 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
+                <div>
+                    <h2 class="text-sm font-bold text-gray-900">Uncategorized Backlog</h2>
+                    <p class="text-[11px] text-gray-500 mt-0.5">Tap a item below to resolve mapping rules.</p>
+                </div>
+                <span class="px-2 py-0.5 text-xs font-mono font-bold bg-amber-50 text-amber-700 border border-amber-200/60 rounded-full">
+                    {{ transactions|length }} left
+                </span>
+            </div>
+            
+            <div class="grow overflow-y-auto divide-y divide-gray-100 font-medium">
+                {% for tx in transactions %}
+                    <div onclick="selectTransaction('{{ tx.id }}')" 
+                        id="tx-card-{{ tx.id }}"
+                        class="p-4 hover:bg-slate-50/80 active:bg-blue-50/40 cursor-pointer transition-all border-l-4 border-l-transparent group">
+                        <div class="flex items-center justify-between font-mono text-[10px] text-gray-400 mb-1">
+                            <span>{{ tx.date|format_date }}</span>
+                            <span class="truncate max-w-35 text-right" title="{{ tx.source_account }}">{{ tx.base_account_name }}</span>
+                        </div>
+                        <p class="text-xs font-bold text-gray-800 group-hover:text-blue-600 transition-colors truncate">{{ tx.description }}</p>
+                        <p class="text-xs font-mono font-bold text-gray-900 text-right mt-2">{{ tx.amount|format_currency }} HUF</p>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="w-full bg-white rounded-2xl border border-gray-200 shadow-sm p-4 sm:p-6 flex flex-col min-h-100 lg:min-h-[calc(100vh-120px)] lg:col-span-2" id="workspaceConsole">
+            
+            <div id="workspaceEmptyState" class="flex flex-col items-center justify-center my-auto py-12 text-gray-400 text-center">
+                <svg class="w-12 h-12 mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                </svg>
+                <p class="text-xs font-bold uppercase tracking-wider text-gray-400">No Transaction Selected</p>
+                <p class="text-[11px] text-gray-400 mt-1 max-w-xs">Select a transaction from the pending queue above to view raw fields and build match logic.</p>
+            </div>
+
+            <div id="workspaceForm" class="hidden flex-col justify-between h-full space-y-6">
+                
+                <header class="pb-4 border-b border-gray-100 flex flex-col sm:flex-row sm:items-start justify-between gap-2">
+                    <div>
+                        <span id="wsDate" class="text-[10px] font-mono font-bold text-gray-400 uppercase tracking-wider"></span>
+                        <h3 id="wsDescription" class="text-base sm:text-lg font-bold text-gray-900 mt-0.5 wrap-break-word">Placeholder Description</h3>
+                        <p class="text-xs text-gray-500 mt-1">Source: <span id="wsSource" class="font-mono bg-gray-50 border border-gray-200 px-1.5 py-0.5 rounded text-gray-700 inline-block max-w-[200px] truncate align-middle"></span></p>
+                    </div>
+                    <div class="text-left sm:text-right border-t sm:border-t-0 pt-2 sm:pt-0">
+                        <span class="text-[10px] font-bold text-gray-400 uppercase block">Settlement Value</span>
+                        <span id="wsAmount" class="text-base sm:text-lg font-mono font-bold text-gray-900 block mt-0.5">0000</span>
+                    </div>
+                </header>
+
+                <div class="space-y-3">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                        <label class="block text-xs font-bold uppercase tracking-wider text-gray-400">1. Click Data to Build Regex</label>
+                        <span class="text-[10px] bg-blue-50 text-blue-700 font-medium px-2 py-0.5 rounded border border-blue-100/60 self-start sm:self-auto">Tap cell to add logic</span>
+                    </div>
+                    
+                    <div class="border border-gray-200 rounded-xl shadow-inner bg-slate-50/40 overflow-x-auto">
+                        <table class="w-full text-left border-collapse font-mono text-[11px] min-w-[320px]">
+                            <thead>
+                                <tr class="bg-gray-100 border-b border-gray-200 text-gray-400 uppercase text-[9px] font-bold tracking-wider sticky top-0">
+                                    <th class="p-2 w-[35%]">Key Path</th>
+                                    <th class="p-2 w-[65%]">Raw Value Field</th>
+                                </tr>
+                            </thead>
+                            <tbody id="jsonInspectorBody" class="divide-y divide-gray-100 bg-white">
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="block text-[11px] font-bold text-gray-500">Active Match Patterns</label>
+                        <div id="activeRulesList" class="space-y-2 max-h-35 overflow-y-auto">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-4 border-t border-gray-100 space-y-4">
+                    <label class="block text-xs font-bold uppercase tracking-wider text-gray-400">2. Assign Target Category</label>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-[11px] font-semibold text-gray-600 mb-1">Select Existing Account Group</label>
+                            <select id="categorySelect" class="w-full px-3 py-2.5 text-xs bg-white border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-medium text-gray-700">
+                                <option value="">-- Choose Category Path --</option>
+                                {% for account_id, account_path in categories.items() %}
+                                    <option value="{{ account_id }}" data-path="{{ account_path }}">{{ account_path }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="bg-slate-50 p-3 rounded-xl border border-gray-200/80 space-y-2">
+                            <span class="block text-[11px] font-bold text-gray-600">Create New Tree Hierarchy Category</span>
+                            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-1.5">
+                                <span id="newCategoryParentPrefix" class="text-[11px] font-mono font-medium text-gray-400 bg-white border border-gray-200 px-2 py-2 rounded-lg truncate sm:max-w-35">Root:</span>
+                                <input type="text" id="newCategoryName" placeholder="Sub-category (e.g. Sushi)" class="grow px-2 py-2 text-xs bg-white border border-gray-200 rounded-lg outline-none focus:border-blue-500 font-semibold" />
+                                <button type="button" onclick="handleAddNewCategoryInline()" class="py-2 px-3 bg-blue-600 sm:bg-white text-white sm:text-blue-600 hover:bg-blue-50 border border-transparent sm:border-gray-200 hover:border-blue-300 rounded-lg text-xs font-bold transition-all cursor-pointer text-center">
+                                    Create
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-4 border-t border-gray-100 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+                    <p class="text-[10px] text-gray-400 text-center sm:text-left">Commits an immutable matching rule to the global engine.</p>
+                    <div class="flex items-center gap-2 w-full sm:w-auto">
+                        <button type="button" onclick="cancelWorkspace()" class="flex-1 sm:flex-initial px-3 py-2.5 border border-gray-200 text-gray-600 rounded-xl text-xs font-semibold hover:bg-gray-50 cursor-pointer transition-colors text-center">Cancel</button>
+                        <button type="button" onclick="commitMappingRule()" class="flex-1 sm:flex-initial px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold shadow-sm cursor-pointer transition-colors text-center">Commit Rule</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
