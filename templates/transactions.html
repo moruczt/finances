@@ -11,7 +11,7 @@
         
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-gray-200 mb-4">
             <div>
-                <h1 class="text-xl font-bold text-gray-900 tracking-tight">System Ledger Accounts</h1>
+                <h1 class="text-xl font-bold text-gray-900 tracking-tight">Transactions</h1>
                 <p class="text-xs text-gray-500">Technical audit overview of database transaction mappings.</p>
             </div>
             
@@ -33,79 +33,49 @@
                         <th class="w-7.5 py-2 px-3"></th> <th class="w-25 py-2 px-2 cursor-pointer hover:bg-gray-100 transition-colors">Date ↓</th>
                         <th class="w-25 py-2 px-2">Type</th>
                         <th class="w-50 py-2 px-2">Description</th>
-                        <th class="w-40 py-2 px-2">Source Account</th>
+                        <th class="w-40 py-2 px-2">Base Account</th>
                         <th class="w-40 py-2 px-2">Target / Category</th>
                         <th class="w-32.5 py-2 px-3 text-right cursor-pointer hover:bg-gray-100 transition-colors">Amount (HUF)</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100 text-xs text-gray-600 font-medium">
-                    
-                    <tr class="hover:bg-blue-50/20 transition-colors cursor-pointer group" onclick="toggleDetails('tx_101')">
-                        <td class="py-2.5 px-3 text-center text-gray-400 group-hover:text-gray-600">
-                            <svg id="chevron-tx_101" class="w-3 h-3 transform transition-transform duration-150" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
-                        </td>
-                        <td class="py-2.5 px-2 font-mono text-gray-500">2026-05-30</td>
-                        <td class="py-2.5 px-2">
-                            <span class="px-1.5 py-0.5 rounded text-[10px] bg-red-50 text-red-700 border border-red-100/50">Outgoing</span>
-                        </td>
-                        <td class="py-2.5 px-2 text-gray-900 truncate font-semibold" title="Tesco Supermarket Budapest">Tesco Supermarket Budapest</td>
-                        <td class="py-2.5 px-2 text-gray-500 truncate">Assets:OTP_Checking</td>
-                        <td class="py-2.5 px-2 text-gray-500 truncate">Expenses:Groceries</td>
-                        <td class="py-2.5 px-3 text-right font-mono font-bold text-gray-700">-4,520</td>
-                    </tr>
-                    <tr id="details-tx_101" class="hidden bg-gray-50/60">
-                        <td colspan="7" class="py-3 px-6 border-t border-gray-100/80">
-                            <div class="grid grid-cols-2 gap-8 text-[11px] leading-relaxed text-gray-500">
-                                <div>
-                                    <span class="block font-bold text-[10px] uppercase text-gray-400 tracking-wider mb-1">Raw Import Payload</span>
-                                    <pre class="bg-gray-100 border border-gray-200 p-2 rounded-lg font-mono text-[10px] text-gray-600 overflow-x-auto whitespace-pre-wrap">FT261519028123 // CARD_PURCHASE // TESCO BP // REFN: 9812491</pre>
-                                </div>
-                                <div class="space-y-1">
-                                    <span class="block font-bold text-[10px] uppercase text-gray-400 tracking-wider mb-1">System Metadata</span>
-                                    <div><span class="font-semibold text-gray-600">Internal Transaction ID:</span> <span class="font-mono">tx_unique_101</span></div>
-                                    <div><span class="font-semibold text-gray-600">Import Session:</span> <a href="/imports" class="text-blue-600 underline font-mono">imp_20260530_01</a></div>
-                                    <div><span class="font-semibold text-gray-600">Exchange Multiplier:</span> None (Native HUF transaction)</div>
-                                </div>
-                            </div>
-                        </td>
-                    </tr>
-
-                    <tr class="hover:bg-blue-50/20 transition-colors cursor-pointer group" onclick="toggleDetails('tx_102')">
-                        <td class="py-2.5 px-3 text-center text-gray-400 group-hover:text-gray-600">
-                            <svg id="chevron-tx_102" class="w-3 h-3 transform transition-transform duration-150" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
-                        </td>
-                        <td class="py-2.5 px-2 font-mono text-gray-500">2026-05-28</td>
-                        <td class="py-2.5 px-2">
-                            <span class="px-1.5 py-0.5 rounded text-[10px] bg-indigo-50 text-indigo-700 border border-indigo-100/50">Transfer</span>
-                        </td>
-                        <td class="py-2.5 px-2 text-gray-900 truncate font-semibold" title="Wallet Funding Interaccount">Wallet Funding Interaccount</td>
-                        <td class="py-2.5 px-2 text-gray-500 truncate">Assets:OTP_Checking</td>
-                        <td class="py-2.5 px-2 text-gray-500 truncate">Assets:Revolut_HUF</td>
-                        <td class="py-2.5 px-3 text-right font-mono font-bold text-indigo-600">±20,000</td>
-                    </tr>
-                    <tr id="details-tx_102" class="hidden bg-gray-50/60">
-                        <td colspan="7" class="py-3 px-6 border-t border-gray-100/80">
-                            <div class="grid grid-cols-2 gap-8 text-[11px] leading-relaxed text-gray-500">
-                                <div class="space-y-2">
-                                    <div>
-                                        <span class="block font-bold text-[10px] uppercase text-gray-400 tracking-wider mb-1">Raw Record 1 (Outflow Side)</span>
-                                        <pre class="bg-gray-100 border border-gray-200 p-1.5 rounded font-mono text-[10px] text-gray-600 truncate">REVOLUT TOPUP TRF // -20000 HUF</pre>
+                    {% for tr in transactions %}
+                        <tr class="hover:bg-blue-50/20 transition-colors cursor-pointer group" onclick="toggleDetails(`tx_{{ tr.id }}`)">
+                            <td class="py-2.5 px-3 text-center text-gray-400 group-hover:text-gray-600">
+                                <svg id="chevron-tx_{{ tr.id }}" class="w-3 h-3 transform transition-transform duration-150" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path>
+                                </svg>
+                            </td>
+                            <td class="py-2.5 px-2 font-mono text-gray-500">{{ tr.date|format_date }}</td>
+                            <td class="py-2.5 px-2">
+                                <span class="px-1.5 py-0.5 rounded text-[10px] badge-tx-{{ tr.direction.value }}">{{ tr.direction.value }}</span>
+                            </td>
+                            <td class="py-2.5 px-2 text-gray-900 truncate font-semibold" title="Tesco Supermarket Budapest">{{ tr.description }}</td>
+                            <td class="py-2.5 px-2 text-gray-500 truncate" title="{{ tr.base_account_path }}">{{ tr.base_account_name }}</td>
+                            <td class="py-2.5 px-2 text-gray-500 truncate" title="{{ tr.target_account_paths }}">{{ tr.target_account_names }}</td>
+                            <td class="py-2.5 px-3 text-right font-mono font-bold amount-tx-{{ tr.direction.value }}">{{ tr.amount|format_currency }}</td>
+                        </tr>
+                        <tr id="details-tx_{{ tr.id }}" class="hidden bg-gray-50/60">
+                            <td colspan="7" class="py-3 px-6 border-t border-gray-100/80">
+                                <div class="grid grid-cols-1 gap-8 text-[11px] leading-relaxed text-gray-500">
+                                    <div class="space-y-{{ tr.raw_imports|length }}"> {## space-y-<raw_count> ##}
+                                        {% for raw_import in tr.raw_imports %}
+                                            <div>
+                                                <span class="block font-bold text-[10px] uppercase text-gray-400 tracking-wider mb-1">Raw Record #{{ loop.index }}</span>
+                                                <pre class="bg-gray-100 border border-gray-200 p-1.5 rounded-lg font-mono text-[10px] text-gray-600 overflow-x-auto whitespace-pre-wrap">{{ raw_import.details }}</pre>
+                                            </div>
+                                        {% endfor %}
                                     </div>
-                                    <div>
-                                        <span class="block font-bold text-[10px] uppercase text-gray-400 tracking-wider mb-1">Raw Record 2 (Inflow Side)</span>
-                                        <pre class="bg-gray-100 border border-gray-200 p-1.5 rounded font-mono text-[10px] text-gray-600 truncate">FROM BANK ACC ...4821 // +20000 HUF</pre>
-                                    </div>
+                                    {# <div class="space-y-1">
+                                        <span class="block font-bold text-[10px] uppercase text-gray-400 tracking-wider mb-1">System Metadata</span>
+                                        <div><span class="font-semibold text-gray-600">Internal Transaction ID:</span> <span class="font-mono">tx_unique_101</span></div>
+                                        <div><span class="font-semibold text-gray-600">Import Session:</span> <a href="/imports" class="text-blue-600 underline font-mono">imp_20260530_01</a></div>
+                                        <div><span class="font-semibold text-gray-600">Exchange Multiplier:</span> None (Native HUF transaction)</div>
+                                    </div> #}
                                 </div>
-                                <div class="space-y-1">
-                                    <span class="block font-bold text-[10px] uppercase text-gray-400 tracking-wider mb-1">Multi-Currency Context</span>
-                                    <div><span class="font-semibold text-gray-600">Base Settlement:</span> 20,000.00 HUF</div>
-                                    <div><span class="font-semibold text-gray-600">Original FX Inflow Value:</span> <span class="bg-amber-50 text-amber-800 border border-amber-100 px-1 py-0.2 rounded font-mono">51.24 EUR</span></div>
-                                    <div><span class="font-semibold text-gray-600">Calculated Book Rate:</span> 1 EUR = 390.32 HUF</div>
-                                </div>
-                            </div>
-                        </td>
-                    </tr>
-
+                            </td>
+                        </tr>
+                    {% endfor %}
                 </tbody>
             </table>
         </div>

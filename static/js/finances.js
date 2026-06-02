@@ -11,7 +11,9 @@ async function request(url, method="GET", data=null, onload=null, contentType="j
             }
         }
         const response = await fetch(url, options);
+        console.log(response)
         const resp = await response.json();
+        console.log(resp)
         if (resp.msg) showToast(resp.msg, resp.msgType, resp.msgDur);
 
         onload(resp);

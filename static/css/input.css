@@ -21,4 +21,28 @@
         @apply bg-blue-600/90 text-white border-blue-300;
     }
 
+    .badge-tx-transfer {
+        @apply bg-indigo-50 text-indigo-700 border border-indigo-100/50;
+    }
+
+    .badge-tx-outgoing {
+        @apply bg-red-50 text-red-700 border border-red-100/50;
+    }
+
+    .badge-tx-incoming {
+        @apply bg-emerald-50 text-emerald-700 border border-emerald-100/50;
+    }
+
+    .amount-tx-transfer {
+        @apply text-indigo-700;
+    }
+    
+    .amount-tx-outgoing {
+        @apply text-red-700;
+    }
+    
+    .amount-tx-incoming {
+        @apply text-emerald-700;
+    }
+
 }

@@ -30,6 +30,8 @@ async function rawImport(e) {const allowedExtensions = /(\.csv|\.xlsx)$/i;
 }
 
 
+// PAGE LOAD SCRIPTS
+
 const fileInput = document.getElementById('fileInput');
 const dropZone = document.getElementById('dropZone');
 fileInput.addEventListener("change", rawImport);
