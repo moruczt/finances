@@ -105,7 +105,7 @@ function removeRegexRule(index) {
 function handleAddNewCategoryInline() {
     const select = document.getElementById('categorySelect');
     const selectedOption = select.options[select.selectedIndex];
-    const parentPath = selectedOption.getAttribute('data-path');
+    const parentPath = selectedOption.dataset['path'];
     const newName = document.getElementById('newCategoryName').value.trim();
 
     if(!newName) {
@@ -125,7 +125,7 @@ function handleAddNewCategoryInline() {
             const mockGeneratedId = Math.floor(Math.random() * 1000) + 500; // Mock ID assignment
             newOpt.value = mockGeneratedId;
             newOpt.text = completeGeneratedPath;
-            newOpt.setAttribute('data-path', completeGeneratedPath);
+            newOpt.dataset['path'] = completeGeneratedPath;
             newOpt.selected = true;
             select.add(newOpt);
             document.getElementById('newCategoryName').value = "";
@@ -155,7 +155,7 @@ function commitMappingRule() {
         "target_account_id": targetAccountId,
         "rules": {}
     };
-    for (key in currentActiveRegexRules) {
+    for (const key in currentActiveRegexRules) {
         data["rules"][key] = currentActiveRegexRules[key];
     }
 
@@ -176,6 +176,6 @@ const prefixLabel = document.getElementById('newCategoryParentPrefix');
 
 select.addEventListener('change', () => {
     const selectedOption = select.options[select.selectedIndex];
-    const activePath = selectedOption.getAttribute('data-path');
+    const activePath = selectedOption.dataset['path'];
     prefixLabel.innerText = activePath ? activePath + ":" : "Root:";
 });

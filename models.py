@@ -139,10 +139,10 @@ class Transaction(Base):
         return entry.account_path if entry else ""
     @property
     def target_account_names(self):
-        return " | ".join(map(lambda e2: e2.account_name, filter(lambda e: not e.is_base, self.entries)))
+        return " | ".join(e.account_name for e in self.entries if not e.is_base)
     @property
     def target_account_paths(self):
-        return " | ".join(map(lambda e2: e2.account_path, filter(lambda e: not e.is_base, self.entries)))
+        return " | ".join(e.account_path for e in self.entries if not e.is_base)
     @property
     def raw_imports(self):
         return list({e.raw_import.id: e.raw_import for e in self.entries}.values())
