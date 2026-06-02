@@ -122,7 +122,7 @@ function handleAddNewCategoryInline() {
         if (resp.success) {
             const completeGeneratedPath = `${parentPath}:${newName}`;
             const newOpt = document.createElement('option');
-            const mockGeneratedId = Math.floor(Math.random() * 1000) + 500; // Mock ID assignment
+            const mockGeneratedId = 500; // Mock ID assignment
             newOpt.value = mockGeneratedId;
             newOpt.text = completeGeneratedPath;
             newOpt.dataset['path'] = completeGeneratedPath;
