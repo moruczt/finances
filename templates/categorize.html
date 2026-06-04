@@ -7,10 +7,10 @@
 {% endblock %}
 
 {% block content %}
-    <div class="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 py-4 sm:py-6 min-h-screen grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
+    <div class="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 py-4 sm:py-6 min-h-[calc(100vh-64px)] lg:min-h-[calc(100vh-57px)] lg:h-[calc(100vh-57px)] grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6 box-border">
         
-        <div class="w-full bg-white rounded-2xl border border-gray-200 shadow-sm flex flex-col overflow-hidden h-87.5 lg:h-[calc(100vh-120px)] lg:sticky lg:top-6">
-            <div class="p-4 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
+        <div class="w-full bg-white rounded-2xl border border-gray-200 shadow-sm flex flex-col overflow-hidden h-95 lg:h-[calc(100vh-104px)] lg:sticky lg:top-6">
+            <div class="p-4 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between shrink-0">
                 <div>
                     <h2 class="text-sm font-bold text-gray-900">Uncategorized Backlog</h2>
                     <p class="text-[11px] text-gray-500 mt-0.5">Tap a item below to resolve mapping rules.</p>
@@ -36,7 +36,7 @@
             </div>
         </div>
 
-        <div class="w-full bg-white rounded-2xl border border-gray-200 shadow-sm p-4 sm:p-6 flex flex-col min-h-100 lg:min-h-[calc(100vh-120px)] lg:col-span-2" id="workspaceConsole">
+        <div class="w-full bg-white rounded-2xl border border-gray-200 shadow-sm p-4 sm:p-6 flex flex-col min-h-[450px] lg:min-h-0 lg:h-[calc(100vh-104px)] lg:col-span-2 overflow-hidden" id="workspaceConsole">
             
             <div id="workspaceEmptyState" class="flex flex-col items-center justify-center my-auto py-12 text-gray-400 text-center">
                 <svg class="w-12 h-12 mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">

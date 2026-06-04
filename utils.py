@@ -20,7 +20,7 @@ from database import get_db, get_redis
 import models
 
 
-UNKNOWN_ACCOUNT_ID = os.getenv("UNKNOWN_ACCOUNT_ID")
+UNKNOWN_ACCOUNT_ID = int(os.getenv("UNKNOWN_ACCOUNT_ID", "0"))
 
 class AuthenticationRequiredException(Exception):
     pass
@@ -93,36 +93,31 @@ def is_match(tr, rules:dict) -> int:
 
 async def apply_rule(rule_id:int, db:AsyncSession) -> None:
     query = select(models.Rule).where(models.Rule.id==rule_id)
-    log(f"Query rule:\n{query}")
     rule = (await db.execute(query)).scalar_one()
-    log(f"Queried rule:\n{rule}")
     query = select(models.AccountConfig.account_id)
-    log(f"Query transfer accounts:\n{query}")
     transfer_account_ids = (await db.execute(query)).scalars()
-    log(f"Queried transfer accounts:\n{transfer_account_ids}")
 
     query = select(models.RawImport) \
             .join(models.Entry, models.Entry.raw_import_id==models.RawImport.id) \
             .where(models.RawImport.account_id==rule.account_id,
                    models.Entry.account_id==UNKNOWN_ACCOUNT_ID)
-    log(f"Query transactions:\n{query}")
     transactions = (await db.execute(query)).scalars().all()
+    applied_count = 0
     for tr in transactions:
-        log(f"Transaction:\n{tr}")
         target_id = is_match(json.loads(tr.raw_data), {rule.target_account_id:json.loads(rule.conditions)})
-        log(f"Target account: {target_id} ({target_id == rule.target_account_id})")
         if target_id != rule.target_account_id:
             continue
         
-        ## Update Transactions:
-        ## - is_temporary = False
         query = update(models.Transaction).values(is_temporary=False).where(models.Transaction.source_raw_import_id==tr.id)
-        log(f"Update Transaction:\n{query}")
         await db.execute(query)
 
-        ## Update Entries:
-        ## - account_id = rule.target_account_id
-
-    
+        query = select(models.Entry.id).where(models.Entry.raw_import_id==tr.id,
+                                              models.Entry.is_base==False)
+        entry_ids = (await db.execute(query)).scalars().all()
+        query = update(models.Entry).values(account_id=target_id).where(models.Entry.id.in_(entry_ids))
+        await db.execute(query)
+        
+        applied_count += 1
+    return applied_count
 
         

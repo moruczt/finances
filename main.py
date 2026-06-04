@@ -84,9 +84,10 @@ async def send_login(request:Request, username:Annotated[str,Form(...)], passwor
     if not user:
         raise utils.AuthenticationRequiredException("Invalid credentials")
     session_id = str(uuid.uuid4())
-    await redis.setex(f"session:{session_id}", 60*60, user)
+    expiry = os.getenv("SESSION_EXPIRY_SECS", 60*60)
+    await redis.setex(f"session:{session_id}", expiry, user)
     resp = RedirectResponse(url=next or request.url_for("page_dashboard"), status_code=303)
-    resp.set_cookie(key="session_id", value=session_id, httponly=True, domain=os.getenv("DOMAIN"), samesite="strict", secure=True)
+    resp.set_cookie(key="session_id", value=session_id, httponly=True, domain=os.getenv("DOMAIN"), samesite="strict", secure=True, max_age=expiry)
     return resp
 
 @app.post("/logout")
@@ -152,7 +153,7 @@ async def page_categorise(request:Request, db:DB, user:AuthedUser):
             .join(ChildAccount, ChildAccount.parent_id==models.Account.id, isouter=True) \
             .where(ChildAccount.id.is_(None)) \
             .order_by(models.Account.path)
-    categories = {c["id"]:c["path"] for c in (await db.execute(query)).mappings().all() if c["id"] != os.getenv("UNKNOWN_ACCOUNT_ID")}
+    categories = {c["id"]:c["path"] for c in (await db.execute(query)).mappings().all() if c["id"] != utils.UNKNOWN_ACCOUNT_ID}
     return templates.TemplateResponse(
                 request=request,
                 name="categorize.html",
@@ -234,38 +235,35 @@ async def add_category(payload:NewCategoryPayload, request:Request, db:DB, user:
 
 @app.post("/api/rules")
 async def apply_rule(payload:NewRulePayload, request:Request, db:DB, user:AuthedUser):
-    log(f"applying rule:\n{payload}")
     query = select(models.Account.id) \
             .join(models.RawImport, models.RawImport.account_id==models.Account.id) \
             .join(models.Transaction, models.Transaction.source_raw_import_id==models.RawImport.id) \
             .where(models.Transaction.id==payload.transaction_id,
                    models.Transaction.is_temporary==True)
-    log(f"Query account:\n{query}")
     account_id = (await db.execute(query)).scalar_one()
     if not account_id:
         return {"success":False, "msg":"Uncategorized transaction not found", "msgType":"error", "msgDur":4000, "result":{}}
-    log(f"Queried account: {account_id}")
     
     query = insert(models.Rule).values(account_id=account_id,
                                         target_account_id=payload.target_account_id,
                                         conditions=json.dumps(payload.rules)).returning(models.Rule.id)
-    log(f"Insert rule:\n{query}")
     new_id = (await db.execute(query)).scalar_one()
-    log(f"Inserted rule: {new_id}")
 
-    await utils.apply_rule(new_id, db)
-
-    return {"success":True, "msg":"Transaction successfully categorized", "msgType":"success", "msgDur":4000, "result":{"id":new_id}}
+    applied_count = await utils.apply_rule(new_id, db)
+    await db.commit()
+    return {"success":True, "msg":"Transaction successfully categorized", "msgType":"success", "msgDur":4000, "result":{"id":new_id, "applied_count":applied_count}}
 
 @app.delete("/api/wipe")
 async def wipe_db(db:DB, user:AuthedUser):
     await db.execute(delete(models.Transaction))
     await db.execute(delete(models.RawImport))
     await db.execute(delete(models.Import))
+    await db.execute(delete(models.Rule))
     await db.execute(text("SELECT setval(pg_get_serial_sequence('entries', 'id'), 1, false);"))
     await db.execute(text("SELECT setval(pg_get_serial_sequence('transactions', 'id'), 1, false);"))
     await db.execute(text("SELECT setval(pg_get_serial_sequence('raw_imports', 'id'), 1, false);"))
     await db.execute(text("SELECT setval(pg_get_serial_sequence('imports', 'id'), 1, false);"))
+    await db.execute(text("SELECT setval(pg_get_serial_sequence('rules', 'id'), 1, false);"))
     await db.commit()
 
     return {"success":True, "msg":"Database was successfully wiped", "msgType":"success", "msgDur":4000, "result":{}}
