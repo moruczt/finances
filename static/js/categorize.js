@@ -155,13 +155,14 @@ function commitMappingRule() {
         "target_account_id": targetAccountId,
         "rules": {}
     };
-    for (const key in currentActiveRegexRules) {
-        data["rules"][key] = currentActiveRegexRules[key];
-    }
+    
+    currentActiveRegexRules.forEach((rule)=>{
+        data["rules"][rule.key] = rule.regex;
+    });
 
     const onLoad = (resp) => {
         if (resp.success) {
-            // globalThis.location.reload();
+            globalThis.location.reload();
         }
     }
     
