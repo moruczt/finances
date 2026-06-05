@@ -91,7 +91,7 @@ def is_match(tr, rules:dict) -> int:
             return target_account_id
     return UNKNOWN_ACCOUNT_ID
 
-async def apply_rule(rule_id:int, db:AsyncSession) -> None:
+async def apply_rule(rule_id:int, db:AsyncSession) -> int:
     query = select(models.Rule).where(models.Rule.id==rule_id)
     rule = (await db.execute(query)).scalar_one()
     query = select(models.AccountConfig.account_id)
@@ -116,7 +116,7 @@ async def apply_rule(rule_id:int, db:AsyncSession) -> None:
         entry_ids = (await db.execute(query)).scalars().all()
         query = update(models.Entry).values(account_id=target_id).where(models.Entry.id.in_(entry_ids))
         await db.execute(query)
-        
+
         applied_count += 1
     return applied_count
 

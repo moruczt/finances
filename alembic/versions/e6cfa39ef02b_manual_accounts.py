@@ -10,6 +10,8 @@ from typing import Sequence, Union
 from alembic import op
 import sqlalchemy as sa
 
+from models import AccountSide
+
 
 # revision identifiers, used by Alembic.
 revision: str = 'e6cfa39ef02b'
@@ -31,31 +33,31 @@ def upgrade() -> None:
                              sa.column("side", sa.String),
                              sa.column("path", sa.String))
     op.bulk_insert(account_table, [
-                    {"id":31,"parent_id":None,"name":"Shopping","side":"Expenses","path":"Expenses:Shopping"},
-                        {"id":32,"parent_id":31,"name":"Hypermarket","side":"Expenses","path":"Expenses:Shopping:Hypermarket"},
-                        {"id":33,"parent_id":31,"name":"Drogerie","side":"Expenses","path":"Expenses:Shopping:Drogerie"},
-                        {"id":55,"parent_id":31,"name":"Food","side":"Expenses","path":"Expenses:Shopping:Food"},
-                    {"id":34,"parent_id":None,"name":"Subscription","side":"Expenses","path":"Expenses:Subscription"},
-                        {"id":35,"parent_id":34,"name":"HBO","side":"Expenses","path":"Expenses:Subscription:HBO"},
-                        {"id":36,"parent_id":34,"name":"Netflix","side":"Expenses","path":"Expenses:Subscription:Netflix"},
-                        {"id":37,"parent_id":34,"name":"Spotify","side":"Expenses","path":"Expenses:Subscription:Spotify"},
-                        {"id":38,"parent_id":34,"name":"Gym","side":"Expenses","path":"Expenses:Subscription:Gym"},
-                        {"id":39,"parent_id":34,"name":"Telekom","side":"Expenses","path":"Expenses:Subscription:Telekom"},
-                        {"id":40,"parent_id":34,"name":"Flat","side":"Expenses","path":"Expenses:Subscription:Flat"},
-                    {"id":41,"parent_id":None,"name":"Fees","side":"Expenses","path":"Expenses:Fees"},
-                    {"id":42,"parent_id":None,"name":"Commute","side":"Expenses","path":"Expenses:Commute"},
-                        {"id":43,"parent_id":42,"name":"BKV","side":"Expenses","path":"Expenses:Commute:BKV"},
-                        {"id":44,"parent_id":42,"name":"Train","side":"Expenses","path":"Expenses:Commute:Train"},
-                    {"id":45,"parent_id":None,"name":"Luxury","side":"Expenses","path":"Expenses:Luxury"},
-                        {"id":46,"parent_id":45,"name":"Wellness","side":"Expenses","path":"Expenses:Luxury:Wellness"},
-                        {"id":47,"parent_id":45,"name":"AI","side":"Expenses","path":"Expenses:Luxury:AI"},
-                        {"id":48,"parent_id":45,"name":"Eatout","side":"Expenses","path":"Expenses:Luxury:Eatout"},
-                        {"id":49,"parent_id":45,"name":"Gym","side":"Expenses","path":"Expenses:Luxury:Gym"},
-                        {"id":50,"parent_id":45,"name":"Books","side":"Expenses","path":"Expenses:Luxury:Books"},
-                        {"id":51,"parent_id":45,"name":"Clothes","side":"Expenses","path":"Expenses:Luxury:Clothes"},
-                        {"id":52,"parent_id":45,"name":"Electronics","side":"Expenses","path":"Expenses:Luxury:Electronics"},
-                        {"id":53,"parent_id":45,"name":"Taxi","side":"Expenses","path":"Expenses:Luxury:Taxi"},
-                        {"id":54,"parent_id":45,"name":"Gaming}","side":"Expenses","path":"Expenses:Luxury:Gaming"},
+                    {"id":31,"parent_id":None,"name":"Shopping","side":AccountSide.Expenses.value,"path":"Expenses:Shopping"},
+                        {"id":32,"parent_id":31,"name":"Hypermarket","side":AccountSide.Expenses.value,"path":"Expenses:Shopping:Hypermarket"},
+                        {"id":33,"parent_id":31,"name":"Drogerie","side":AccountSide.Expenses.value,"path":"Expenses:Shopping:Drogerie"},
+                        {"id":55,"parent_id":31,"name":"Food","side":AccountSide.Expenses.value,"path":"Expenses:Shopping:Food"},
+                    {"id":34,"parent_id":None,"name":"Subscription","side":AccountSide.Expenses.value,"path":"Expenses:Subscription"},
+                        {"id":35,"parent_id":34,"name":"HBO","side":AccountSide.Expenses.value,"path":"Expenses:Subscription:HBO"},
+                        {"id":36,"parent_id":34,"name":"Netflix","side":AccountSide.Expenses.value,"path":"Expenses:Subscription:Netflix"},
+                        {"id":37,"parent_id":34,"name":"Spotify","side":AccountSide.Expenses.value,"path":"Expenses:Subscription:Spotify"},
+                        {"id":38,"parent_id":34,"name":"Gym","side":AccountSide.Expenses.value,"path":"Expenses:Subscription:Gym"},
+                        {"id":39,"parent_id":34,"name":"Telekom","side":AccountSide.Expenses.value,"path":"Expenses:Subscription:Telekom"},
+                        {"id":40,"parent_id":34,"name":"Flat","side":AccountSide.Expenses.value,"path":"Expenses:Subscription:Flat"},
+                    {"id":41,"parent_id":None,"name":"Fees","side":AccountSide.Expenses.value,"path":"Expenses:Fees"},
+                    {"id":42,"parent_id":None,"name":"Commute","side":AccountSide.Expenses.value,"path":"Expenses:Commute"},
+                        {"id":43,"parent_id":42,"name":"BKV","side":AccountSide.Expenses.value,"path":"Expenses:Commute:BKV"},
+                        {"id":44,"parent_id":42,"name":"Train","side":AccountSide.Expenses.value,"path":"Expenses:Commute:Train"},
+                    {"id":45,"parent_id":None,"name":"Luxury","side":AccountSide.Expenses.value,"path":"Expenses:Luxury"},
+                        {"id":46,"parent_id":45,"name":"Wellness","side":AccountSide.Expenses.value,"path":"Expenses:Luxury:Wellness"},
+                        {"id":47,"parent_id":45,"name":"AI","side":AccountSide.Expenses.value,"path":"Expenses:Luxury:AI"},
+                        {"id":48,"parent_id":45,"name":"Eatout","side":AccountSide.Expenses.value,"path":"Expenses:Luxury:Eatout"},
+                        {"id":49,"parent_id":45,"name":"Gym","side":AccountSide.Expenses.value,"path":"Expenses:Luxury:Gym"},
+                        {"id":50,"parent_id":45,"name":"Books","side":AccountSide.Expenses.value,"path":"Expenses:Luxury:Books"},
+                        {"id":51,"parent_id":45,"name":"Clothes","side":AccountSide.Expenses.value,"path":"Expenses:Luxury:Clothes"},
+                        {"id":52,"parent_id":45,"name":"Electronics","side":AccountSide.Expenses.value,"path":"Expenses:Luxury:Electronics"},
+                        {"id":53,"parent_id":45,"name":"Taxi","side":AccountSide.Expenses.value,"path":"Expenses:Luxury:Taxi"},
+                        {"id":54,"parent_id":45,"name":"Gaming}","side":AccountSide.Expenses.value,"path":"Expenses:Luxury:Gaming"},
                 ])
     
     op.execute("SELECT setval(pg_get_serial_sequence('accounts','id'), (select max(id) from accounts))")
