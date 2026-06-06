@@ -86,9 +86,10 @@ AuthedUser = Annotated[str, Depends(auth_session)]
 
 
 def is_match(tr, rules:dict) -> int:
-    for target_account_id, conditions in rules.items():
-        if all(re.search(val, tr[col]) for col, val in conditions.items()):
-            return target_account_id
+    for target_account_id, conditions_list in rules.items():
+        for conditions in conditions_list:
+            if all(re.search(val, tr[col]) for col, val in conditions.items()):
+                return target_account_id
     return UNKNOWN_ACCOUNT_ID
 
 async def apply_rule(rule_id:int, db:AsyncSession) -> int:
@@ -104,7 +105,7 @@ async def apply_rule(rule_id:int, db:AsyncSession) -> int:
     transactions = (await db.execute(query)).scalars().all()
     applied_count = 0
     for tr in transactions:
-        target_id = is_match(json.loads(tr.raw_data), {rule.target_account_id:json.loads(rule.conditions)})
+        target_id = is_match(json.loads(tr.raw_data), {rule.target_account_id:[json.loads(rule.conditions)]})
         if target_id != rule.target_account_id:
             continue
         
