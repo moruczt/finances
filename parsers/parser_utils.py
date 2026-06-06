@@ -1,4 +1,5 @@
 import json
+from collections import defaultdict
 
 from sqlalchemy import select, insert, update
 from sqlalchemy.ext.asyncio.session import AsyncSession
@@ -29,10 +30,14 @@ async def import_trs(data:DataFrame, db:AsyncSession, import_id:int, account_id:
     data.rename({"id":"_raw_id"}, axis=1, inplace=True)
 
     query = select(models.Rule.target_account_id, models.Rule.conditions).where(models.Rule.account_id==account_id)
-    rules = {r["target_account_id"]:json.loads(r["conditions"]) for r in (await db.execute(query)).mappings().all()}
+    rules = defaultdict(list)
+    for r in (await db.execute(query)).mappings().all():
+        rules[r["target_account_id"]].append(json.loads(r["conditions"]))
     query = select(models.AccountConfig.account_id)
     transfer_account_ids = (await db.execute(query)).scalars()
+    log(rules)
     data["_target_account_id"] = data.apply(lambda tr: utils.is_match(tr, rules), axis=1)
+    log(data[["Ellenoldali név","_target_account_id"]])
 
     for _, tr in data.iterrows():
         direction = None
