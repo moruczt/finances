@@ -308,12 +308,12 @@ async def wipe_db(db:DB, user:AuthedUser):
     await db.execute(delete(models.Transaction))
     await db.execute(delete(models.RawImport))
     await db.execute(delete(models.Import))
-    await db.execute(delete(models.Rule))
+    # await db.execute(delete(models.Rule))
     await db.execute(text("SELECT setval(pg_get_serial_sequence('entries', 'id'), 1, false);"))
     await db.execute(text("SELECT setval(pg_get_serial_sequence('transactions', 'id'), 1, false);"))
     await db.execute(text("SELECT setval(pg_get_serial_sequence('raw_imports', 'id'), 1, false);"))
     await db.execute(text("SELECT setval(pg_get_serial_sequence('imports', 'id'), 1, false);"))
-    await db.execute(text("SELECT setval(pg_get_serial_sequence('rules', 'id'), 1, false);"))
+    # await db.execute(text("SELECT setval(pg_get_serial_sequence('rules', 'id'), 1, false);"))
     await db.commit()
 
     return {"success":True, "msg":"Database was successfully wiped", "msgType":"success", "msgDur":4000, "result":{}}
