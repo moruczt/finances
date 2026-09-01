@@ -34,17 +34,20 @@ async def import_trs(data:DataFrame, db:AsyncSession, import_id:int, account_id:
     for r in (await db.execute(query)).mappings().all():
         rules[r["target_account_id"]].append(json.loads(r["conditions"]))
     query = select(models.AccountConfig.account_id)
-    transfer_account_ids = (await db.execute(query)).scalars()
+    transfer_account_ids = set((await db.execute(query)).scalars())
     data["_target_account_id"] = data.apply(lambda tr: utils.is_match(tr, rules), axis=1)
 
     for _, tr in data.iterrows():
         direction = None
         if tr["_target_account_id"] in transfer_account_ids:
-            ##TODO: TEST IT !!!
-            query = select(models.Entry.id).join(models.Transaction, models.Transaction.id==models.Entry.transaction_id).where(models.Transaction.is_temporary==True,
+            # An already-confirmed transaction on the target account may already carry this
+            # transfer's other leg (imported/categorized from that side first) - link this raw
+            # row to it instead of creating a redundant transaction for the same real event.
+            query = select(models.Entry.id).join(models.Transaction, models.Transaction.id==models.Entry.transaction_id).where(models.Transaction.is_temporary==False,
                                                   models.Transaction.date==tr["_date"],
                                                   models.Entry.account_id==account_id,
-                                                  models.Entry.amount_huf==-tr["_amount"])
+                                                  models.Entry.is_base==False,
+                                                  models.Entry.amount_huf==tr["_amount"])
             entry_id = (await db.execute(query)).scalar()
             if entry_id:
                 query = update(models.Entry).values(raw_import_id=tr["_raw_id"]).where(models.Entry.id==entry_id)
