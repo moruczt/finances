@@ -103,10 +103,10 @@ function showConfirm(title, message, confirmText ) {
 }
 
 function escapeHtml(str) {
-    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    return str.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#39;');
 }
 
-function showPrompt(title, message, defaultValue='', confirmText) {
+function showPrompt(title, message, defaultValue='', confirmText='Save') {
     return new Promise((resolve) => {
         const modalHtml = `
             <div id="customModalOverlay" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm opacity-0 transition-opacity duration-200">
@@ -120,7 +120,7 @@ function showPrompt(title, message, defaultValue='', confirmText) {
                             Cancel
                         </button>
                         <button id="modalConfirmBtn" class="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-xs font-semibold text-white shadow-sm transition-colors cursor-pointer">
-                            ${confirmText || 'Save'}
+                            ${confirmText}
                         </button>
                     </div>
                 </div>
