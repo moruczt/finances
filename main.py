@@ -5,6 +5,7 @@ import uuid
 import importlib
 import datetime as dt
 import json
+import subprocess
 from typing import Annotated
 from pydantic import BaseModel
 
@@ -24,9 +25,19 @@ utils.setup_logging()
 app = FastAPI(root_path="/finances", title="Finances")
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
+def get_git_sha():
+    try:
+        return subprocess.check_output(["git", "rev-parse", "--short", "HEAD"],
+                                       cwd=os.path.dirname(os.path.abspath(__file__)),
+                                       stderr=subprocess.DEVNULL).decode().strip()
+    except Exception:
+        return "unknown"
+GIT_SHA = get_git_sha()
+
 def context_processors(request:Request):
     return {"user":getattr(request.state, "user", ""),
-            "now":dt.datetime.today}
+            "now":dt.datetime.today,
+            "git_sha":GIT_SHA}
 templates = Jinja2Templates(directory="templates", context_processors=[context_processors])
 
 def format_currency(value):
