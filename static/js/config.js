@@ -1,3 +1,18 @@
+async function addRootAccount(btn) {
+    const side = btn.dataset.side;
+
+    const name = await showPrompt("Add Top-Level Account", `Create a new top-level account under "${side}".`, '', 'Create');
+    if (!name) return;
+
+    const onLoad = (resp) => {
+        if (resp.success) {
+            globalThis.location.reload();
+        }
+    }
+
+    request(`${ROOT_PATH}/api/accounts/roots/${side}/children`, "POST", {"name":name}, onLoad);
+}
+
 async function addChildAccount(btn) {
     const parentId = btn.dataset.accountId;
     const parentPath = btn.dataset.path;

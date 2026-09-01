@@ -223,15 +223,18 @@ async def page_config(request:Request, db:DB, user:AuthedUser):
                    models.Account.side,
                    func.count(ChildAccount.id).label("child_count")) \
             .outerjoin(ChildAccount, ChildAccount.parent_id==models.Account.id) \
-            .group_by(models.Account.id) \
-            .order_by(models.Account.path)
+            .group_by(models.Account.id)
     rows = (await db.execute(query)).mappings().all()
-    accounts = [{"id":r["id"],
-                "name":r["name"],
-                "path":r["path"],
-                "side":r["side"],
-                "depth":r["path"].count(":"),
-                "has_children":r["child_count"] > 0} for r in rows]
+
+    # "side" isn't a real accounts row - it's just a label baked into every root account's own
+    # path (e.g. "Expenses:Fees"). Render one virtual header per side so there's somewhere to
+    # attach a "+" for adding a genuinely new top-level (parent_id=NULL) account.
+    accounts = [{"id":r["id"], "name":r["name"], "path":r["path"], "side":r["side"],
+                "depth":r["path"].count(":"), "has_children":r["child_count"] > 0, "is_side":False} for r in rows]
+    accounts += [{"id":None, "name":side.value, "path":side.value, "side":side,
+                 "depth":0, "has_children":True, "is_side":True} for side in models.AccountSide]
+    accounts.sort(key=lambda a: a["path"])
+
     return templates.TemplateResponse(
                 request=request,
                 name="config.html",
@@ -308,6 +311,27 @@ async def add_child_account(parent_id:int, payload:AccountNamePayload, request:R
                                               name=name,
                                               side=parent["side"],
                                               path=f"{parent['path']}:{name}").returning(models.Account.id)
+        new_id = (await db.execute(query)).scalar_one()
+        await db.commit()
+    except IntegrityError:
+        await db.rollback()
+        return {"success":False, "msg":"An account with that name already exists here", "msgType":"error", "msgDur":4000, "result":{}}
+
+    return {"success":True, "msg":"Account created", "msgType":"success", "msgDur":3000, "result":{"id":new_id}}
+
+@app.post("/api/accounts/roots/{side}/children")
+async def add_root_account(side:models.AccountSide, payload:AccountNamePayload, request:Request, db:DB, user:AuthedUser):
+    name = payload.name.strip()
+    if not name:
+        return {"success":False, "msg":"Name is required", "msgType":"error", "msgDur":4000, "result":{}}
+    if ":" in name:
+        return {"success":False, "msg":"Account name cannot contain ':'", "msgType":"error", "msgDur":4000, "result":{}}
+
+    try:
+        query = insert(models.Account).values(parent_id=None,
+                                              name=name,
+                                              side=side,
+                                              path=f"{side.value}:{name}").returning(models.Account.id)
         new_id = (await db.execute(query)).scalar_one()
         await db.commit()
     except IntegrityError:
