@@ -293,7 +293,15 @@ async def apply_rule(payload:NewRulePayload, request:Request, db:DB, user:Authed
     account_id = (await db.execute(query)).scalar_one()
     if not account_id:
         return {"success":False, "msg":"Uncategorized transaction not found", "msgType":"error", "msgDur":4000, "result":{}}
-    
+
+    if not payload.rules:
+        # No match pattern was built - categorize only this one transaction instead of saving a
+        # rule that (with no conditions to check) would otherwise match every uncategorized
+        # transaction for this account.
+        await utils.categorize_transaction(payload.transaction_id, payload.target_account_id, db)
+        await db.commit()
+        return {"success":True, "msg":"Transaction successfully categorized", "msgType":"success", "msgDur":4000, "result":{"id":None, "applied_count":1}}
+
     query = insert(models.Rule).values(account_id=account_id,
                                         target_account_id=payload.target_account_id,
                                         conditions=json.dumps(payload.rules)).returning(models.Rule.id)

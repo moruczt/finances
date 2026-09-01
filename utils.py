@@ -88,9 +88,66 @@ AuthedUser = Annotated[str, Depends(auth_session)]
 def is_match(tr, rules:dict) -> int:
     for target_account_id, conditions_list in rules.items():
         for conditions in conditions_list:
-            if all(re.search(str(val), str(tr[col])) for col, val in conditions.items()):
+            # An empty conditions dict must never match - all() of an empty iterable is True,
+            # which would otherwise match every row unconditionally.
+            if conditions and all(re.search(str(val), str(tr[col])) for col, val in conditions.items()):
                 return target_account_id
     return UNKNOWN_ACCOUNT_ID
+
+async def categorize_transaction(transaction_id:int, target_id:int, db:AsyncSession, transfer_account_ids:set=None) -> bool:
+    """Categorize a single temporary transaction's non-base leg as target_id, merging with an
+    already-confirmed counterpart transfer entry instead of duplicating it if one is found.
+    Returns False if the transaction doesn't exist / isn't a base-having temporary transaction."""
+    if transfer_account_ids is None:
+        query = select(models.AccountConfig.account_id)
+        transfer_account_ids = set((await db.execute(query)).scalars())
+
+    query = select(models.Transaction.id, models.Transaction.date, models.Transaction.source_raw_import_id,
+                   models.Entry.account_id, models.Entry.amount_huf) \
+            .join(models.Entry, models.Entry.transaction_id==models.Transaction.id) \
+            .where(models.Transaction.id==transaction_id,
+                   models.Entry.is_base==True)
+    base = (await db.execute(query)).mappings().one_or_none()
+    if not base:
+        return False
+
+    merged_entry_id = None
+    if target_id in transfer_account_ids:
+        # A placeholder leg for this same event, if it already exists, would be sitting on THIS
+        # transaction's own account - the other side's own categorization would have pointed it
+        # here. Exclude ones already resolved by an earlier merge (their raw_import_id now
+        # points at their own account) so duplicate same-day/same-amount transfers each match a
+        # distinct, still-unresolved counterpart.
+        query = select(models.Entry.id) \
+                .join(models.Transaction, models.Transaction.id==models.Entry.transaction_id) \
+                .join(models.RawImport, models.RawImport.id==models.Entry.raw_import_id) \
+                .where(models.Entry.account_id==base["account_id"],
+                       models.Entry.is_base==False,
+                       models.Transaction.is_temporary==False,
+                       models.Transaction.date==base["date"],
+                       models.Entry.amount_huf==base["amount_huf"],
+                       models.RawImport.account_id!=models.Entry.account_id)
+        merged_entry_id = (await db.execute(query)).scalar()
+
+    if merged_entry_id:
+        # An existing confirmed transaction on the target account already represents this same
+        # transfer's other leg - link this raw row to it and drop the redundant one created
+        # when this side was imported (cascades to its 2 entries).
+        query = update(models.Entry).values(raw_import_id=base["source_raw_import_id"]).where(models.Entry.id==merged_entry_id)
+        await db.execute(query)
+        query = delete(models.Transaction).where(models.Transaction.id==base["id"])
+        await db.execute(query)
+    else:
+        query = update(models.Transaction).values(is_temporary=False).where(models.Transaction.id==base["id"])
+        await db.execute(query)
+
+        query = select(models.Entry.id).where(models.Entry.raw_import_id==base["source_raw_import_id"],
+                                              models.Entry.is_base==False)
+        entry_ids = (await db.execute(query)).scalars().all()
+        query = update(models.Entry).values(account_id=target_id).where(models.Entry.id.in_(entry_ids))
+        await db.execute(query)
+
+    return True
 
 async def apply_rule(rule_id:int, db:AsyncSession) -> int:
     query = select(models.Rule).where(models.Rule.id==rule_id)
@@ -109,47 +166,9 @@ async def apply_rule(rule_id:int, db:AsyncSession) -> int:
         if target_id != rule.target_account_id:
             continue
 
-        query = select(models.Transaction.id, models.Transaction.date, models.Entry.amount_huf) \
-                .join(models.Entry, models.Entry.transaction_id==models.Transaction.id) \
-                .where(models.Transaction.source_raw_import_id==raw_import.id,
-                       models.Entry.is_base==True)
-        base = (await db.execute(query)).mappings().one()
-
-        merged_entry_id = None
-        if target_id in transfer_account_ids:
-            # A placeholder leg for this same event, if it already exists, would be sitting on
-            # THIS account (rule.account_id) - the other side's own categorization would have
-            # pointed it here. Exclude ones already resolved by an earlier merge (their
-            # raw_import_id now points at their own account) so duplicate same-day/same-amount
-            # transfers each match a distinct, still-unresolved counterpart.
-            query = select(models.Entry.id) \
-                    .join(models.Transaction, models.Transaction.id==models.Entry.transaction_id) \
-                    .join(models.RawImport, models.RawImport.id==models.Entry.raw_import_id) \
-                    .where(models.Entry.account_id==rule.account_id,
-                           models.Entry.is_base==False,
-                           models.Transaction.is_temporary==False,
-                           models.Transaction.date==base["date"],
-                           models.Entry.amount_huf==base["amount_huf"],
-                           models.RawImport.account_id!=models.Entry.account_id)
-            merged_entry_id = (await db.execute(query)).scalar()
-
-        if merged_entry_id:
-            # An existing confirmed transaction on the target account already represents this
-            # same transfer's other leg - link this raw row to it and drop the redundant one
-            # created when this side was imported (cascades to its 2 entries).
-            query = update(models.Entry).values(raw_import_id=raw_import.id).where(models.Entry.id==merged_entry_id)
-            await db.execute(query)
-            query = delete(models.Transaction).where(models.Transaction.id==base["id"])
-            await db.execute(query)
-        else:
-            query = update(models.Transaction).values(is_temporary=False).where(models.Transaction.id==base["id"])
-            await db.execute(query)
-
-            query = select(models.Entry.id).where(models.Entry.raw_import_id==raw_import.id,
-                                                  models.Entry.is_base==False)
-            entry_ids = (await db.execute(query)).scalars().all()
-            query = update(models.Entry).values(account_id=target_id).where(models.Entry.id.in_(entry_ids))
-            await db.execute(query)
+        query = select(models.Transaction.id).where(models.Transaction.source_raw_import_id==raw_import.id)
+        transaction_id = (await db.execute(query)).scalar_one()
+        await categorize_transaction(transaction_id, target_id, db, transfer_account_ids)
 
         applied_count += 1
     return applied_count
