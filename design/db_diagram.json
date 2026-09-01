@@ -1,0 +1,431 @@
+{
+  "version": "31.4.1",
+  "pages": [
+    {
+      "id": "DOBIqIMbODrYG-mudWKg",
+      "name": "Page-1",
+      "cells": [
+        {
+          "id": "3Bv-D2Wj-F5zdcArTFU6-7",
+          "type": "node",
+          "parent": "1",
+          "label": "Database Relational Diagram"
+        },
+        {
+          "id": "3Bv-D2Wj-F5zdcArTFU6-8",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-7",
+          "label": "accounts"
+        },
+        {
+          "id": "3Bv-D2Wj-F5zdcArTFU6-9",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-8",
+          "label": "id"
+        },
+        {
+          "id": "3Bv-D2Wj-F5zdcArTFU6-41",
+          "type": "edge",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-8",
+          "source": "3Bv-D2Wj-F5zdcArTFU6-10",
+          "target": "3Bv-D2Wj-F5zdcArTFU6-9"
+        },
+        {
+          "id": "3Bv-D2Wj-F5zdcArTFU6-10",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-8",
+          "label": "parent_id"
+        },
+        {
+          "id": "3Bv-D2Wj-F5zdcArTFU6-12",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-8",
+          "label": "name"
+        },
+        {
+          "id": "3Bv-D2Wj-F5zdcArTFU6-13",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-8",
+          "label": "side"
+        },
+        {
+          "id": "3Bv-D2Wj-F5zdcArTFU6-14",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-8",
+          "label": "path"
+        },
+        {
+          "id": "3Bv-D2Wj-F5zdcArTFU6-11",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-8",
+          "label": "created_at"
+        },
+        {
+          "id": "3Bv-D2Wj-F5zdcArTFU6-15",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-7",
+          "label": "account_configs"
+        },
+        {
+          "id": "3Bv-D2Wj-F5zdcArTFU6-16",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-15",
+          "label": "id"
+        },
+        {
+          "id": "3Bv-D2Wj-F5zdcArTFU6-17",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-15",
+          "label": "account_id"
+        },
+        {
+          "id": "3Bv-D2Wj-F5zdcArTFU6-18",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-15",
+          "label": "parser"
+        },
+        {
+          "id": "94tmjQTCNocBdemScWCU-4",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-15",
+          "label": "raw_extension",
+          "html": "raw_<span style=\"background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));\">extension</span>"
+        },
+        {
+          "id": "3Bv-D2Wj-F5zdcArTFU6-21",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-15",
+          "label": "created_at"
+        },
+        {
+          "id": "3Bv-D2Wj-F5zdcArTFU6-22",
+          "type": "edge",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-7",
+          "source": "3Bv-D2Wj-F5zdcArTFU6-17",
+          "target": "3Bv-D2Wj-F5zdcArTFU6-9"
+        },
+        {
+          "id": "3Bv-D2Wj-F5zdcArTFU6-23",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-7",
+          "label": "raw_imports"
+        },
+        {
+          "id": "3Bv-D2Wj-F5zdcArTFU6-24",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-23",
+          "label": "id"
+        },
+        {
+          "id": "3Bv-D2Wj-F5zdcArTFU6-25",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-23",
+          "label": "account_id"
+        },
+        {
+          "id": "3Bv-D2Wj-F5zdcArTFU6-26",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-23",
+          "label": "raw_data"
+        },
+        {
+          "id": "3Bv-D2Wj-F5zdcArTFU6-27",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-23",
+          "label": "row_hash"
+        },
+        {
+          "id": "3Bv-D2Wj-F5zdcArTFU6-28",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-23",
+          "label": "import_id"
+        },
+        {
+          "id": "3Bv-D2Wj-F5zdcArTFU6-29",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-23",
+          "label": "created_at"
+        },
+        {
+          "id": "3Bv-D2Wj-F5zdcArTFU6-31",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-7",
+          "label": "entries"
+        },
+        {
+          "id": "3Bv-D2Wj-F5zdcArTFU6-32",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-31",
+          "label": "id"
+        },
+        {
+          "id": "3Bv-D2Wj-F5zdcArTFU6-33",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-31",
+          "label": "transaction_id"
+        },
+        {
+          "id": "3Bv-D2Wj-F5zdcArTFU6-34",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-31",
+          "label": "account_id"
+        },
+        {
+          "id": "3Bv-D2Wj-F5zdcArTFU6-35",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-31",
+          "label": "raw_import_id"
+        },
+        {
+          "id": "ERoTeWhuZtuaWQbLMLdV-3",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-31",
+          "label": "is_base"
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-61",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-31",
+          "label": "amount_huf"
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-63",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-31",
+          "label": "amount_orig"
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-62",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-31",
+          "label": "exchange_rate"
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-64",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-31",
+          "label": "currency"
+        },
+        {
+          "id": "3Bv-D2Wj-F5zdcArTFU6-37",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-31",
+          "label": "created_at"
+        },
+        {
+          "id": "3Bv-D2Wj-F5zdcArTFU6-43",
+          "type": "edge",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-7",
+          "source": "3Bv-D2Wj-F5zdcArTFU6-35",
+          "target": "3Bv-D2Wj-F5zdcArTFU6-24"
+        },
+        {
+          "id": "3Bv-D2Wj-F5zdcArTFU6-44",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-7",
+          "label": "transactions"
+        },
+        {
+          "id": "3Bv-D2Wj-F5zdcArTFU6-45",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-44",
+          "label": "id"
+        },
+        {
+          "id": "3Bv-D2Wj-F5zdcArTFU6-46",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-44",
+          "label": "date"
+        },
+        {
+          "id": "3Bv-D2Wj-F5zdcArTFU6-47",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-44",
+          "label": "description"
+        },
+        {
+          "id": "94tmjQTCNocBdemScWCU-3",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-44",
+          "label": "source"
+        },
+        {
+          "id": "ERoTeWhuZtuaWQbLMLdV-1",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-44",
+          "label": "direction"
+        },
+        {
+          "id": "ERoTeWhuZtuaWQbLMLdV-2",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-44",
+          "label": "source_raw_import_id"
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-87",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-44",
+          "label": "is_temporary"
+        },
+        {
+          "id": "3Bv-D2Wj-F5zdcArTFU6-48",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-44",
+          "label": "created_at"
+        },
+        {
+          "id": "3Bv-D2Wj-F5zdcArTFU6-50",
+          "type": "edge",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-7",
+          "source": "3Bv-D2Wj-F5zdcArTFU6-33",
+          "target": "3Bv-D2Wj-F5zdcArTFU6-45"
+        },
+        {
+          "id": "3Bv-D2Wj-F5zdcArTFU6-51",
+          "type": "edge",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-7",
+          "source": "3Bv-D2Wj-F5zdcArTFU6-25",
+          "target": "3Bv-D2Wj-F5zdcArTFU6-9"
+        },
+        {
+          "id": "3Bv-D2Wj-F5zdcArTFU6-52",
+          "type": "edge",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-7",
+          "source": "3Bv-D2Wj-F5zdcArTFU6-34",
+          "target": "3Bv-D2Wj-F5zdcArTFU6-9"
+        },
+        {
+          "id": "3Bv-D2Wj-F5zdcArTFU6-240",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-7",
+          "label": "rules"
+        },
+        {
+          "id": "3Bv-D2Wj-F5zdcArTFU6-241",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-240",
+          "label": "id"
+        },
+        {
+          "id": "3Bv-D2Wj-F5zdcArTFU6-242",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-240",
+          "label": "account_id"
+        },
+        {
+          "id": "3Bv-D2Wj-F5zdcArTFU6-243",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-240",
+          "label": "target_account_id"
+        },
+        {
+          "id": "3Bv-D2Wj-F5zdcArTFU6-246",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-240",
+          "label": "conditions"
+        },
+        {
+          "id": "3Bv-D2Wj-F5zdcArTFU6-244",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-240",
+          "label": "created_at"
+        },
+        {
+          "id": "3Bv-D2Wj-F5zdcArTFU6-247",
+          "type": "edge",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-7",
+          "source": "3Bv-D2Wj-F5zdcArTFU6-242",
+          "target": "3Bv-D2Wj-F5zdcArTFU6-9"
+        },
+        {
+          "id": "3Bv-D2Wj-F5zdcArTFU6-248",
+          "type": "edge",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-7",
+          "source": "3Bv-D2Wj-F5zdcArTFU6-243",
+          "target": "3Bv-D2Wj-F5zdcArTFU6-9"
+        },
+        {
+          "id": "94tmjQTCNocBdemScWCU-5",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-7",
+          "label": "imports"
+        },
+        {
+          "id": "94tmjQTCNocBdemScWCU-6",
+          "type": "node",
+          "parent": "94tmjQTCNocBdemScWCU-5",
+          "label": "id"
+        },
+        {
+          "id": "94tmjQTCNocBdemScWCU-16",
+          "type": "node",
+          "parent": "94tmjQTCNocBdemScWCU-5",
+          "label": "account_id"
+        },
+        {
+          "id": "94tmjQTCNocBdemScWCU-7",
+          "type": "node",
+          "parent": "94tmjQTCNocBdemScWCU-5",
+          "label": "file_name"
+        },
+        {
+          "id": "94tmjQTCNocBdemScWCU-8",
+          "type": "node",
+          "parent": "94tmjQTCNocBdemScWCU-5",
+          "label": "row_count"
+        },
+        {
+          "id": "94tmjQTCNocBdemScWCU-12",
+          "type": "node",
+          "parent": "94tmjQTCNocBdemScWCU-5",
+          "label": "imported_count"
+        },
+        {
+          "id": "94tmjQTCNocBdemScWCU-9",
+          "type": "node",
+          "parent": "94tmjQTCNocBdemScWCU-5",
+          "label": "min_date"
+        },
+        {
+          "id": "94tmjQTCNocBdemScWCU-11",
+          "type": "node",
+          "parent": "94tmjQTCNocBdemScWCU-5",
+          "label": "max_date"
+        },
+        {
+          "id": "94tmjQTCNocBdemScWCU-15",
+          "type": "node",
+          "parent": "94tmjQTCNocBdemScWCU-5",
+          "label": "success"
+        },
+        {
+          "id": "94tmjQTCNocBdemScWCU-10",
+          "type": "node",
+          "parent": "94tmjQTCNocBdemScWCU-5",
+          "label": "created_at"
+        },
+        {
+          "id": "94tmjQTCNocBdemScWCU-14",
+          "type": "edge",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-7",
+          "source": "3Bv-D2Wj-F5zdcArTFU6-28",
+          "target": "94tmjQTCNocBdemScWCU-6"
+        },
+        {
+          "id": "94tmjQTCNocBdemScWCU-17",
+          "type": "edge",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-7",
+          "source": "94tmjQTCNocBdemScWCU-16",
+          "target": "3Bv-D2Wj-F5zdcArTFU6-9"
+        },
+        {
+          "id": "ERoTeWhuZtuaWQbLMLdV-4",
+          "type": "edge",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-7",
+          "source": "ERoTeWhuZtuaWQbLMLdV-2",
+          "target": "3Bv-D2Wj-F5zdcArTFU6-24"
+        }
+      ]
+    }
+  ]
+}

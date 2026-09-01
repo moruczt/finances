@@ -25,7 +25,7 @@ async function rawImport(e) {const allowedExtensions = /(\.csv|\.xlsx)$/i;
         document.getElementById("spinner").classList.add("hidden");
     }
 
-    request(`/finances/api/accounts/${accountId}/import`,"POST", formData, onLoad, "formData")
+    request(`${ROOT_PATH}/api/accounts/${accountId}/import`,"POST", formData, onLoad, "formData")
     e.target.value = "";
 }
 

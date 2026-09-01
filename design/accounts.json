@@ -1,0 +1,227 @@
+{
+  "version": "31.4.1",
+  "pages": [
+    {
+      "id": "DOBIqIMbODrYG-mudWKg",
+      "name": "Page-1",
+      "cells": [
+        {
+          "id": "3Bv-D2Wj-F5zdcArTFU6-110",
+          "type": "node",
+          "parent": "1",
+          "label": "Accounts"
+        },
+        {
+          "id": "3Bv-D2Wj-F5zdcArTFU6-90",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-110",
+          "label": "I. Assets"
+        },
+        {
+          "id": "3Bv-D2Wj-F5zdcArTFU6-53",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-90",
+          "label": "I.1. Liquid"
+        },
+        {
+          "id": "3Bv-D2Wj-F5zdcArTFU6-54",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-53",
+          "label": "Erste Debit"
+        },
+        {
+          "id": "3Bv-D2Wj-F5zdcArTFU6-55",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-53",
+          "label": "Erste Hitel"
+        },
+        {
+          "id": "3Bv-D2Wj-F5zdcArTFU6-56",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-53",
+          "label": "Erste Wizzair"
+        },
+        {
+          "id": "3Bv-D2Wj-F5zdcArTFU6-57",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-53",
+          "label": "MBH Debit"
+        },
+        {
+          "id": "3Bv-D2Wj-F5zdcArTFU6-58",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-53",
+          "label": "MBH Credit"
+        },
+        {
+          "id": "3Bv-D2Wj-F5zdcArTFU6-60",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-53",
+          "label": "Lloyds Debit"
+        },
+        {
+          "id": "3Bv-D2Wj-F5zdcArTFU6-61",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-53",
+          "label": "OTP Szep"
+        },
+        {
+          "id": "3Bv-D2Wj-F5zdcArTFU6-62",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-53",
+          "label": "Revo HUF"
+        },
+        {
+          "id": "3Bv-D2Wj-F5zdcArTFU6-63",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-53",
+          "label": "Revo GBP"
+        },
+        {
+          "id": "3Bv-D2Wj-F5zdcArTFU6-59",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-53",
+          "label": "Revo EUR"
+        },
+        {
+          "id": "3Bv-D2Wj-F5zdcArTFU6-64",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-53",
+          "label": "Cash"
+        },
+        {
+          "id": "3Bv-D2Wj-F5zdcArTFU6-65",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-53",
+          "label": "Wise"
+        },
+        {
+          "id": "3Bv-D2Wj-F5zdcArTFU6-67",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-90",
+          "label": "I.2. Investment"
+        },
+        {
+          "id": "3Bv-D2Wj-F5zdcArTFU6-68",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-67",
+          "label": "MAK"
+        },
+        {
+          "id": "3Bv-D2Wj-F5zdcArTFU6-69",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-67",
+          "label": "Erste Broker"
+        },
+        {
+          "id": "3Bv-D2Wj-F5zdcArTFU6-70",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-67",
+          "label": "OTP LTP"
+        },
+        {
+          "id": "3Bv-D2Wj-F5zdcArTFU6-71",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-67",
+          "label": "Binance"
+        },
+        {
+          "id": "3Bv-D2Wj-F5zdcArTFU6-80",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-90",
+          "label": "I.3. Receivables"
+        },
+        {
+          "id": "3Bv-D2Wj-F5zdcArTFU6-81",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-80",
+          "label": "Tibi"
+        },
+        {
+          "id": "3Bv-D2Wj-F5zdcArTFU6-82",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-80",
+          "label": "Anya"
+        },
+        {
+          "id": "3Bv-D2Wj-F5zdcArTFU6-85",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-80",
+          "label": "Clift"
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-115",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-90",
+          "label": "I.4. Unknown"
+        },
+        {
+          "id": "3Bv-D2Wj-F5zdcArTFU6-94",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-110",
+          "label": "II. Liabilities"
+        },
+        {
+          "id": "3Bv-D2Wj-F5zdcArTFU6-97",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-94",
+          "label": "II.1. StudentLoan"
+        },
+        {
+          "id": "3Bv-D2Wj-F5zdcArTFU6-98",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-110",
+          "label": "III. Equity"
+        },
+        {
+          "id": "3Bv-D2Wj-F5zdcArTFU6-99",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-98",
+          "label": "III.1. OpeningBalance"
+        },
+        {
+          "id": "3Bv-D2Wj-F5zdcArTFU6-100",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-110",
+          "label": "IV. Income"
+        },
+        {
+          "id": "3Bv-D2Wj-F5zdcArTFU6-101",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-100",
+          "label": "IV.1. Salary"
+        },
+        {
+          "id": "94tmjQTCNocBdemScWCU-1",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-100",
+          "label": "IV.2. Clift"
+        },
+        {
+          "id": "94tmjQTCNocBdemScWCU-2",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-100",
+          "label": "IV.3. Stat"
+        },
+        {
+          "id": "3Bv-D2Wj-F5zdcArTFU6-102",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-100",
+          "label": "IV.4. Other"
+        },
+        {
+          "id": "3Bv-D2Wj-F5zdcArTFU6-103",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-110",
+          "label": "V. Expenses"
+        },
+        {
+          "id": "3Bv-D2Wj-F5zdcArTFU6-105",
+          "type": "node",
+          "parent": "3Bv-D2Wj-F5zdcArTFU6-103",
+          "label": "V.1. Uncategorised"
+        }
+      ]
+    }
+  ]
+}

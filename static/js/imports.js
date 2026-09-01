@@ -11,5 +11,5 @@ async function wipeDatabase() {
         }
     }
 
-    request('/finances/api/wipe',"DELETE", {}, onLoad)
+    request(`${ROOT_PATH}/api/wipe`,"DELETE", {}, onLoad)
 }

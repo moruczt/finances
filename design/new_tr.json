@@ -1,0 +1,513 @@
+{
+  "version": "31.4.1",
+  "pages": [
+    {
+      "id": "DOBIqIMbODrYG-mudWKg",
+      "name": "Page-1",
+      "cells": [
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-24",
+          "type": "edge",
+          "parent": "1",
+          "source": "u_NqubqD6cDLFVBmPzdR-1",
+          "target": "u_NqubqD6cDLFVBmPzdR-23"
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-1",
+          "type": "node",
+          "parent": "1",
+          "label": "New TR"
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-18",
+          "type": "edge",
+          "parent": "1",
+          "source": "u_NqubqD6cDLFVBmPzdR-8",
+          "target": "u_NqubqD6cDLFVBmPzdR-16"
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-8",
+          "type": "node",
+          "parent": "1",
+          "label": "Hash"
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-17",
+          "type": "edge",
+          "parent": "1",
+          "source": "u_NqubqD6cDLFVBmPzdR-9",
+          "target": "u_NqubqD6cDLFVBmPzdR-16"
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-9",
+          "type": "node",
+          "parent": "1",
+          "label": "Import Hashes"
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-4",
+          "type": "node",
+          "parent": "u_NqubqD6cDLFVBmPzdR-9",
+          "label": "Hash 1"
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-5",
+          "type": "node",
+          "parent": "u_NqubqD6cDLFVBmPzdR-9",
+          "label": "Hash 2"
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-6",
+          "type": "node",
+          "parent": "u_NqubqD6cDLFVBmPzdR-9",
+          "label": "..."
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-7",
+          "type": "node",
+          "parent": "u_NqubqD6cDLFVBmPzdR-9",
+          "label": "Hash n"
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-34",
+          "type": "edge",
+          "parent": "1",
+          "source": "u_NqubqD6cDLFVBmPzdR-10",
+          "target": "u_NqubqD6cDLFVBmPzdR-32"
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-10",
+          "type": "node",
+          "parent": "1",
+          "label": "Raw Fingerprints"
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-11",
+          "type": "node",
+          "parent": "u_NqubqD6cDLFVBmPzdR-10",
+          "label": "Fingerprint 1"
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-12",
+          "type": "node",
+          "parent": "u_NqubqD6cDLFVBmPzdR-10",
+          "label": "Fingerprint 2"
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-13",
+          "type": "node",
+          "parent": "u_NqubqD6cDLFVBmPzdR-10",
+          "label": "..."
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-14",
+          "type": "node",
+          "parent": "u_NqubqD6cDLFVBmPzdR-10",
+          "label": "Fingerprint n"
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-30",
+          "type": "edge",
+          "parent": "1",
+          "source": "u_NqubqD6cDLFVBmPzdR-16",
+          "target": "u_NqubqD6cDLFVBmPzdR-29"
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-36",
+          "type": "edge",
+          "parent": "1",
+          "source": "u_NqubqD6cDLFVBmPzdR-16",
+          "target": "u_NqubqD6cDLFVBmPzdR-26"
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-16",
+          "type": "node",
+          "parent": "1",
+          "label": "Count\nOccurences",
+          "html": "Count<div>Occurences</div>"
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-33",
+          "type": "edge",
+          "parent": "1",
+          "source": "u_NqubqD6cDLFVBmPzdR-22",
+          "target": "u_NqubqD6cDLFVBmPzdR-32"
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-22",
+          "type": "node",
+          "parent": "1",
+          "label": "Fingerprint"
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-25",
+          "type": "edge",
+          "parent": "1",
+          "source": "u_NqubqD6cDLFVBmPzdR-23",
+          "target": "u_NqubqD6cDLFVBmPzdR-8"
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-23",
+          "type": "node",
+          "parent": "1",
+          "label": "Create\nHash",
+          "html": "Create<div>Hash</div>"
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-28",
+          "type": "edge",
+          "parent": "1",
+          "source": "u_NqubqD6cDLFVBmPzdR-26",
+          "target": "u_NqubqD6cDLFVBmPzdR-9"
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-26",
+          "type": "node",
+          "parent": "1",
+          "label": "Append\nHash",
+          "html": "Append<div>Hash</div>"
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-31",
+          "type": "edge",
+          "parent": "1",
+          "source": "u_NqubqD6cDLFVBmPzdR-29",
+          "target": "u_NqubqD6cDLFVBmPzdR-22"
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-29",
+          "type": "node",
+          "parent": "1",
+          "label": "Create\nFingerprint",
+          "html": "Create<div>Fingerprint</div>"
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-40",
+          "type": "edge",
+          "parent": "1",
+          "source": "u_NqubqD6cDLFVBmPzdR-32",
+          "target": "u_NqubqD6cDLFVBmPzdR-39"
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-32",
+          "type": "node",
+          "parent": "1",
+          "label": "Check\nFingerprint",
+          "html": "Check<div>Fingerprint</div>"
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-66",
+          "type": "edge",
+          "parent": "1",
+          "source": "u_NqubqD6cDLFVBmPzdR-39",
+          "target": "u_NqubqD6cDLFVBmPzdR-41"
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-67",
+          "type": "node",
+          "parent": "u_NqubqD6cDLFVBmPzdR-66",
+          "label": "YES"
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-119",
+          "type": "edge",
+          "parent": "1",
+          "source": "u_NqubqD6cDLFVBmPzdR-39",
+          "target": "u_NqubqD6cDLFVBmPzdR-118"
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-121",
+          "type": "node",
+          "parent": "u_NqubqD6cDLFVBmPzdR-119",
+          "label": "NO"
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-39",
+          "type": "node",
+          "parent": "1",
+          "label": "Found?"
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-41",
+          "type": "node",
+          "parent": "1",
+          "label": "Skip"
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-51",
+          "type": "edge",
+          "parent": "1",
+          "source": "u_NqubqD6cDLFVBmPzdR-44",
+          "target": "u_NqubqD6cDLFVBmPzdR-49"
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-44",
+          "type": "node",
+          "parent": "1",
+          "label": "Rules"
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-45",
+          "type": "node",
+          "parent": "u_NqubqD6cDLFVBmPzdR-44",
+          "label": "Rule 1"
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-46",
+          "type": "node",
+          "parent": "u_NqubqD6cDLFVBmPzdR-44",
+          "label": "Rule 2"
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-47",
+          "type": "node",
+          "parent": "u_NqubqD6cDLFVBmPzdR-44",
+          "label": "..."
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-48",
+          "type": "node",
+          "parent": "u_NqubqD6cDLFVBmPzdR-44",
+          "label": "Rule 3"
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-53",
+          "type": "edge",
+          "parent": "1",
+          "source": "u_NqubqD6cDLFVBmPzdR-49",
+          "target": "u_NqubqD6cDLFVBmPzdR-52"
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-49",
+          "type": "node",
+          "parent": "1",
+          "label": "Check\nRules",
+          "html": "Check<div>Rules</div>"
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-82",
+          "type": "edge",
+          "parent": "1",
+          "source": "u_NqubqD6cDLFVBmPzdR-52",
+          "target": "u_NqubqD6cDLFVBmPzdR-80"
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-85",
+          "type": "node",
+          "parent": "u_NqubqD6cDLFVBmPzdR-82",
+          "label": "NO"
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-52",
+          "type": "node",
+          "parent": "1",
+          "label": "Match?"
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-60",
+          "type": "edge",
+          "parent": "1",
+          "source": "u_NqubqD6cDLFVBmPzdR-55",
+          "target": "u_NqubqD6cDLFVBmPzdR-59"
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-55",
+          "type": "node",
+          "parent": "1",
+          "label": "Create\nTransaction",
+          "html": "Create<div>Transaction</div>"
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-59",
+          "type": "node",
+          "parent": "1",
+          "label": "Create\nEntries",
+          "html": "Create<div>Entries</div>"
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-77",
+          "type": "edge",
+          "parent": "1",
+          "source": "u_NqubqD6cDLFVBmPzdR-74",
+          "target": "u_NqubqD6cDLFVBmPzdR-55"
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-78",
+          "type": "node",
+          "parent": "u_NqubqD6cDLFVBmPzdR-77",
+          "label": "NO"
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-123",
+          "type": "edge",
+          "parent": "1",
+          "source": "u_NqubqD6cDLFVBmPzdR-74",
+          "target": "u_NqubqD6cDLFVBmPzdR-122"
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-124",
+          "type": "node",
+          "parent": "u_NqubqD6cDLFVBmPzdR-123",
+          "label": "YES"
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-74",
+          "type": "node",
+          "parent": "1",
+          "label": "Transfer?"
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-75",
+          "type": "edge",
+          "parent": "1",
+          "source": "u_NqubqD6cDLFVBmPzdR-52",
+          "target": "u_NqubqD6cDLFVBmPzdR-74"
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-76",
+          "type": "node",
+          "parent": "u_NqubqD6cDLFVBmPzdR-75",
+          "label": "YES"
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-79",
+          "type": "edge",
+          "parent": "1",
+          "source": "u_NqubqD6cDLFVBmPzdR-80",
+          "target": "u_NqubqD6cDLFVBmPzdR-81"
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-80",
+          "type": "node",
+          "parent": "1",
+          "label": "Create Temp\nTransaction",
+          "html": "Create Temp<div>Transaction</div>"
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-81",
+          "type": "node",
+          "parent": "1",
+          "label": "Create Temp\nEntries",
+          "html": "Create Temp<div>Entries</div>"
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-116",
+          "type": "node",
+          "parent": "1",
+          "label": "is_temporary = True"
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-117",
+          "type": "node",
+          "parent": "1",
+          "label": "Assets:Unknown"
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-120",
+          "type": "edge",
+          "parent": "1",
+          "source": "u_NqubqD6cDLFVBmPzdR-118",
+          "target": "u_NqubqD6cDLFVBmPzdR-49"
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-118",
+          "type": "node",
+          "parent": "1",
+          "label": "Insert\nRawTr",
+          "html": "Insert<div>RawTr</div>"
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-126",
+          "type": "edge",
+          "parent": "1",
+          "source": "u_NqubqD6cDLFVBmPzdR-122",
+          "target": "u_NqubqD6cDLFVBmPzdR-125"
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-122",
+          "type": "node",
+          "parent": "1",
+          "label": "Check\nEntries",
+          "html": "Check<div>Entries</div>"
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-130",
+          "type": "edge",
+          "parent": "1",
+          "source": "u_NqubqD6cDLFVBmPzdR-125",
+          "target": "u_NqubqD6cDLFVBmPzdR-128"
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-131",
+          "type": "node",
+          "parent": "u_NqubqD6cDLFVBmPzdR-130",
+          "label": "NO"
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-135",
+          "type": "edge",
+          "parent": "1",
+          "source": "u_NqubqD6cDLFVBmPzdR-125",
+          "target": "u_NqubqD6cDLFVBmPzdR-134"
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-136",
+          "type": "node",
+          "parent": "u_NqubqD6cDLFVBmPzdR-135",
+          "label": "YES"
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-125",
+          "type": "node",
+          "parent": "1",
+          "label": "Found?"
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-127",
+          "type": "edge",
+          "parent": "1",
+          "source": "u_NqubqD6cDLFVBmPzdR-128",
+          "target": "u_NqubqD6cDLFVBmPzdR-129"
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-128",
+          "type": "node",
+          "parent": "1",
+          "label": "Create\nTransaction",
+          "html": "Create<div>Transaction</div>"
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-129",
+          "type": "node",
+          "parent": "1",
+          "label": "Create\nEntries",
+          "html": "Create<div>Entries</div>"
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-132",
+          "type": "node",
+          "parent": "1",
+          "label": "Expenses/Incomes"
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-133",
+          "type": "node",
+          "parent": "1",
+          "label": "Assets:Account"
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-134",
+          "type": "node",
+          "parent": "1",
+          "label": "Update Entry"
+        },
+        {
+          "id": "u_NqubqD6cDLFVBmPzdR-137",
+          "type": "node",
+          "parent": "1",
+          "label": "raw_tr_id"
+        }
+      ]
+    }
+  ]
+}
