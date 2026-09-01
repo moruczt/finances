@@ -14,7 +14,7 @@ from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 from sqlalchemy.ext.asyncio.session import AsyncSession
 from sqlalchemy import select, insert, update, delete
-from sqlalchemy.orm import selectinload, joinedload
+from sqlalchemy.orm import selectinload, joinedload, aliased
 
 from database import get_db, get_redis
 import models
@@ -100,6 +100,16 @@ def is_match(tr, rules:dict) -> int:
             if conditions and all(_condition_matches(col, val, tr) for col, val in conditions.items()):
                 return target_account_id
     return UNKNOWN_ACCOUNT_ID
+
+async def get_leaf_categories(db:AsyncSession) -> dict:
+    """Every account with no children of its own, excluding Unknown - the set of valid
+    categorization targets shown on /categorize and offered to the AI suggestion."""
+    ChildAccount = aliased(models.Account)
+    query = select(models.Account.id, models.Account.path) \
+            .join(ChildAccount, ChildAccount.parent_id==models.Account.id, isouter=True) \
+            .where(ChildAccount.id.is_(None)) \
+            .order_by(models.Account.path)
+    return {c["id"]:c["path"] for c in (await db.execute(query)).mappings().all() if c["id"] != UNKNOWN_ACCOUNT_ID}
 
 async def categorize_transaction(transaction_id:int, target_id:int, db:AsyncSession, transfer_account_ids:set=None) -> bool:
     """Categorize a single temporary transaction's non-base leg as target_id, merging with an
