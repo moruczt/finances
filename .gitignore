@@ -6,6 +6,7 @@ venv/
 .env
 static/css/main.css
 *.log
+sample/
 
 node_modules/
 npm-debug.log*
