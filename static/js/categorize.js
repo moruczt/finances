@@ -56,7 +56,7 @@ function populateWorkspace(tx) {
 }
 
 function escapeRegex(str) {
-    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return str.replace(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`);
 }
 
 function addRegexRuleFromCell(key, value) {
