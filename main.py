@@ -5,7 +5,6 @@ import uuid
 import importlib
 import datetime as dt
 import json
-import subprocess
 from typing import Annotated
 from pydantic import BaseModel
 
@@ -26,12 +25,25 @@ app = FastAPI(root_path="/finances", title="Finances")
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 def get_git_sha():
+    git_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".git")
     try:
-        return subprocess.check_output(["git", "rev-parse", "--short", "HEAD"],
-                                       cwd=os.path.dirname(os.path.abspath(__file__)),
-                                       stderr=subprocess.DEVNULL).decode().strip()
-    except Exception:
-        return "unknown"
+        with open(os.path.join(git_dir, "HEAD")) as f:
+            head = f.read().strip()
+        if not head.startswith("ref:"):
+            return head[:7]
+        ref = head.split(" ", 1)[1].strip()
+        ref_path = os.path.join(git_dir, ref)
+        if os.path.exists(ref_path):
+            with open(ref_path) as f:
+                return f.read().strip()[:7]
+        with open(os.path.join(git_dir, "packed-refs")) as f:
+            for line in f:
+                parts = line.split()
+                if len(parts) == 2 and parts[1] == ref:
+                    return parts[0][:7]
+    except Exception as err:
+        log(f"Failed to resolve git sha: {err}", "warning")
+    return "unknown"
 GIT_SHA = get_git_sha()
 
 def context_processors(request:Request):
