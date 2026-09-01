@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %} - Config{% endblock %}
+
+{% block scripts %}
+    <script defer src="{{ url_for('static', path='/js/config.js').path }}"></script>
+{% endblock %}
+
+{% block content %}
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 animate-fade-in">
+        <div class="pb-4 border-b border-gray-200 mb-4">
+            <h1 class="text-xl font-bold text-gray-900 tracking-tight">Config</h1>
+            <p class="text-xs text-gray-500">Manage the account hierarchy.</p>
+        </div>
+
+        <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+            <div class="divide-y divide-gray-100">
+                {% for account in accounts %}
+                    <div class="flex items-center justify-between gap-3 pr-4 py-2.5 hover:bg-gray-50/50 transition-colors" style="padding-left: {{ 1 + account.depth * 1.25 }}rem;">
+                        <div class="flex items-center gap-2 min-w-0">
+                            <span id="account-name-{{ account.id }}" class="text-sm {% if account.has_children %}font-semibold text-gray-800{% else %}text-gray-600{% endif %} truncate">{{ account.name }}</span>
+                            <span class="text-[9px] font-mono font-bold text-gray-300 uppercase tracking-wider shrink-0">{{ account.side.value }}</span>
+                        </div>
+                        <div class="flex items-center gap-1 shrink-0">
+                            {% if account.has_children %}
+                                <button type="button" data-account-id="{{ account.id }}" data-path="{{ account.path }}" onclick="addChildAccount(this)" title="Add child account" class="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+                                </button>
+                            {% endif %}
+                            <button type="button" data-account-id="{{ account.id }}" onclick="renameAccount(this)" title="Rename account" class="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                            </button>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+{% endblock %}
