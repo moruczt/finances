@@ -12,7 +12,7 @@ from fastapi import FastAPI, Depends, Request, UploadFile, File, Form
 from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
-from sqlalchemy import select, insert, update, delete, text
+from sqlalchemy import select, insert, update, delete, text, func
 from sqlalchemy.orm import selectinload, joinedload, aliased
 
 import models
@@ -65,9 +65,33 @@ async def auth_exception_handler(request:Request, exc:utils.AuthenticationRequir
                             content={"success":False, "msg":"Not authenticated", "msgType":"error", "msgDur":4000})
 
 
-@app.get("/")
-async def page_dashboard(user:AuthedUser):
-    return {"status":"Online"}
+@app.get("/", response_class=HTMLResponse)
+async def page_dashboard(request:Request, db:DB, user:AuthedUser):
+    last_import_sq = select(models.Import.account_id,
+                            func.max(models.Import.created_at).label("last_import")) \
+                     .group_by(models.Import.account_id).subquery()
+    tx_stats_sq = select(models.Entry.account_id,
+                         func.max(models.Transaction.date).label("last_transaction"),
+                         func.count(models.Transaction.id).filter(models.Transaction.is_temporary==True).label("uncategorized_count")) \
+                  .join(models.Transaction, models.Transaction.id==models.Entry.transaction_id) \
+                  .where(models.Entry.is_base==True) \
+                  .group_by(models.Entry.account_id).subquery()
+
+    query = select(models.Account.id,
+                   models.Account.name,
+                   models.Account.path,
+                   last_import_sq.c.last_import,
+                   tx_stats_sq.c.last_transaction,
+                   tx_stats_sq.c.uncategorized_count) \
+            .join(models.AccountConfig, models.AccountConfig.account_id==models.Account.id) \
+            .outerjoin(last_import_sq, last_import_sq.c.account_id==models.Account.id) \
+            .outerjoin(tx_stats_sq, tx_stats_sq.c.account_id==models.Account.id) \
+            .order_by(models.Account.path)
+    accounts = (await db.execute(query)).mappings().all()
+    return templates.TemplateResponse(
+                request=request,
+                name="dashboard.html",
+                context={"accounts":accounts})
 
 
 ## LOGIN

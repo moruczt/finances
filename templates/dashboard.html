@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %} - Dashboard{% endblock %}
+
+{% block content %}
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 animate-fade-in">
+        <div class="pb-4 border-b border-gray-200 mb-4">
+            <h1 class="text-xl font-bold text-gray-900 tracking-tight">Dashboard</h1>
+            <p class="text-xs text-gray-500">Overview of importable accounts.</p>
+        </div>
+
+        <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-gray-50 border-b border-gray-200 text-[11px] font-bold uppercase tracking-wider text-gray-400 select-none">
+                            <th class="py-2.5 px-4">Account</th>
+                            <th class="py-2.5 px-4">Last Imported</th>
+                            <th class="py-2.5 px-4">Most Recent Transaction</th>
+                            <th class="py-2.5 px-4 text-right">Uncategorized</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100 text-xs text-gray-600 font-medium">
+                        {% for account in accounts %}
+                            <tr class="hover:bg-blue-50/20 transition-colors">
+                                <td class="py-3 px-4 text-gray-900 font-semibold" title="{{ account.path }}">{{ account.name }}</td>
+                                {% if account.last_import %}
+                                    <td class="py-3 px-4 font-mono text-gray-500">{{ account.last_import.replace(microsecond=0) }}</td>
+                                    <td class="py-3 px-4 font-mono text-gray-500">{% if account.last_transaction %}{{ account.last_transaction|format_date }}{% else %}—{% endif %}</td>
+                                    <td class="py-3 px-4 text-right font-mono font-bold {% if account.uncategorized_count %}text-amber-600{% else %}text-gray-400{% endif %}">{{ account.uncategorized_count or 0 }}</td>
+                                {% else %}
+                                    <td class="py-3 px-4 text-gray-400 italic" colspan="3">Never imported</td>
+                                {% endif %}
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}
