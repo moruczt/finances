@@ -90,7 +90,10 @@
                     <label class="block text-xs font-bold uppercase tracking-wider text-gray-400">2. Assign Target Category</label>
                     
                     <div>
-                        <label class="block text-[11px] font-semibold text-gray-600 mb-1">Select Existing Account Group</label>
+                        <label class="flex items-center gap-1.5 text-[11px] font-semibold text-gray-600 mb-1">
+                            Select Existing Account Group
+                            <span id="aiSuggestingIndicator" class="hidden text-[10px] font-medium normal-case text-blue-500">✨ Suggesting…</span>
+                        </label>
                         <select id="categorySelect" class="w-full px-3 py-2.5 text-xs bg-white border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-medium text-gray-700">
                             <option value="">-- Choose Category Path --</option>
                             {% for account_id, account_path in categories.items() %}

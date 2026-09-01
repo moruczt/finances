@@ -18,6 +18,7 @@ from sqlalchemy.exc import IntegrityError
 
 import models
 import utils
+import ai
 from utils import DB, REDIS, AuthedUser, log
 from parsers.parser_utils import import_trs
 
@@ -206,12 +207,7 @@ async def page_categorise(request:Request, db:DB, user:AuthedUser):
                      .options(joinedload(models.Entry.account)))
     transactions = (await db.execute(query)).scalars().all()
 
-    ChildAccount = aliased(models.Account)
-    query = select(models.Account.id, models.Account.path) \
-            .join(ChildAccount, ChildAccount.parent_id==models.Account.id, isouter=True) \
-            .where(ChildAccount.id.is_(None)) \
-            .order_by(models.Account.path)
-    categories = {c["id"]:c["path"] for c in (await db.execute(query)).mappings().all() if c["id"] != utils.UNKNOWN_ACCOUNT_ID}
+    categories = await utils.get_leaf_categories(db)
     return templates.TemplateResponse(
                 request=request,
                 name="categorize.html",
@@ -300,6 +296,22 @@ async def fetch_transaction(transaction_id:int, request:Request, db:DB, user:Aut
                    "amount": format_currency(tr.amount),
                    "raw_json": tr.raw_imports[0].details}
     return {"success":True, "result":{"transaction":transaction}}
+
+@app.get("/api/transactions/{transaction_id}/suggest-category")
+async def suggest_transaction_category(transaction_id:int, request:Request, db:DB, user:AuthedUser):
+    query = select(models.Transaction) \
+            .where(models.Transaction.is_temporary==True,
+                   models.Transaction.id == transaction_id) \
+            .options(selectinload(models.Transaction.entries) \
+                     .options(joinedload(models.Entry.raw_import)))
+    tr = (await db.execute(query)).scalars().first()
+    if not tr:
+        return {"success":False, "result":{"category_id":None}}
+
+    categories = await utils.get_leaf_categories(db)
+    category_id = await ai.suggest_category(tr.raw_imports[0].details, categories)
+
+    return {"success":True, "result":{"category_id":category_id}}
 
 @app.post("/api/accounts/{parent_id}/children")
 async def add_child_account(parent_id:int, payload:AccountNamePayload, request:Request, db:DB, user:AuthedUser):

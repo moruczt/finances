@@ -12,10 +12,29 @@ async function selectTransaction(txId) {
     const onLoad = (resp) => {
         if (resp.success) {
             populateWorkspace(resp.result.transaction);
+            suggestCategory(txId);
         }
     }
-    
+
     request(`${ROOT_PATH}/api/transactions/${txId}`,"GET", {}, onLoad)
+}
+
+async function suggestCategory(txId) {
+    const indicator = document.getElementById('aiSuggestingIndicator');
+    indicator.classList.remove('hidden');
+
+    const onLoad = (resp) => {
+        indicator.classList.add('hidden');
+        // The user may have already clicked a different transaction by the time this resolves.
+        if (selectedTxId !== txId) return;
+        if (resp.success && resp.result.category_id) {
+            const select = document.getElementById('categorySelect');
+            select.value = resp.result.category_id;
+            select.dispatchEvent(new Event('change'));
+        }
+    }
+
+    request(`${ROOT_PATH}/api/transactions/${txId}/suggest-category`, "GET", {}, onLoad);
 }
 
 function populateWorkspace(tx) {
