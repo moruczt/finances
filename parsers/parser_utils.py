@@ -35,9 +35,7 @@ async def import_trs(data:DataFrame, db:AsyncSession, import_id:int, account_id:
         rules[r["target_account_id"]].append(json.loads(r["conditions"]))
     query = select(models.AccountConfig.account_id)
     transfer_account_ids = (await db.execute(query)).scalars()
-    log(rules)
     data["_target_account_id"] = data.apply(lambda tr: utils.is_match(tr, rules), axis=1)
-    log(data[["Ellenoldali név","_target_account_id"]])
 
     for _, tr in data.iterrows():
         direction = None
@@ -46,7 +44,7 @@ async def import_trs(data:DataFrame, db:AsyncSession, import_id:int, account_id:
             query = select(models.Entry.id).join(models.Transaction, models.Transaction.id==models.Entry.transaction_id).where(models.Transaction.is_temporary==True,
                                                   models.Transaction.date==tr["_date"],
                                                   models.Entry.account_id==account_id,
-                                                  models.Entry.amount_huf==-tr["_amount_huf"])
+                                                  models.Entry.amount_huf==-tr["_amount"])
             entry_id = (await db.execute(query)).scalar()
             if entry_id:
                 query = update(models.Entry).values(raw_import_id=tr["_raw_id"]).where(models.Entry.id==entry_id)
