@@ -95,6 +95,7 @@ async def page_dashboard(request:Request, db:DB, user:AuthedUser):
                      .group_by(models.Import.account_id).subquery()
     tx_stats_sq = select(models.Entry.account_id,
                          func.max(models.Transaction.date).label("last_transaction"),
+                         func.count(models.Transaction.id).label("total_count"),
                          func.count(models.Transaction.id).filter(models.Transaction.is_temporary==True).label("uncategorized_count")) \
                   .join(models.Transaction, models.Transaction.id==models.Entry.transaction_id) \
                   .where(models.Entry.is_base==True) \
@@ -105,16 +106,23 @@ async def page_dashboard(request:Request, db:DB, user:AuthedUser):
                    models.Account.path,
                    last_import_sq.c.last_import,
                    tx_stats_sq.c.last_transaction,
+                   tx_stats_sq.c.total_count,
                    tx_stats_sq.c.uncategorized_count) \
             .join(models.AccountConfig, models.AccountConfig.account_id==models.Account.id) \
             .outerjoin(last_import_sq, last_import_sq.c.account_id==models.Account.id) \
             .outerjoin(tx_stats_sq, tx_stats_sq.c.account_id==models.Account.id) \
             .order_by(models.Account.path)
     accounts = (await db.execute(query)).mappings().all()
+
+    # Every transaction has exactly one is_base entry, and that entry's account is always one
+    # of the importable accounts listed above, so summing the per-account totals here is exact.
+    summary = {"total_count": sum(a["total_count"] or 0 for a in accounts),
+              "uncategorized_count": sum(a["uncategorized_count"] or 0 for a in accounts)}
+
     return templates.TemplateResponse(
                 request=request,
                 name="dashboard.html",
-                context={"accounts":accounts})
+                context={"accounts":accounts, "summary":summary})
 
 
 ## LOGIN
