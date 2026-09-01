@@ -12,7 +12,7 @@ from fastapi import FastAPI, Depends, Request, UploadFile, File, Form
 from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
-from sqlalchemy import select, insert, update, delete, text, func
+from sqlalchemy import select, insert, update, delete, text, func, and_
 from sqlalchemy.orm import selectinload, joinedload, aliased
 
 import models
@@ -166,8 +166,11 @@ async def page_transactions(request:Request, db:DB, user:AuthedUser):
  
 @app.get("/categorize")
 async def page_categorise(request:Request, db:DB, user:AuthedUser):
+    BaseEntry = aliased(models.Entry)
     query = select(models.Transaction) \
+            .join(BaseEntry, and_(BaseEntry.transaction_id==models.Transaction.id, BaseEntry.is_base==True)) \
             .where(models.Transaction.is_temporary==True) \
+            .order_by(models.Transaction.date.asc(), BaseEntry.account_id.asc()) \
             .options(selectinload(models.Transaction.entries) \
                      .options(joinedload(models.Entry.account)))
     transactions = (await db.execute(query)).scalars().all()
