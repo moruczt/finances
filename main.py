@@ -126,7 +126,7 @@ async def page_imports(request:Request, db:DB, user:AuthedUser):
                 context={"imports":imports})
 
 @app.get("/transactions", response_class=HTMLResponse)
-async def page_imports(request:Request, db:DB, user:AuthedUser):
+async def page_transactions(request:Request, db:DB, user:AuthedUser):
     query = select(models.Transaction) \
             .order_by(models.Transaction.date.desc()) \
             .limit(100) \

@@ -15,7 +15,7 @@ async function selectTransaction(txId) {
         }
     }
     
-    request(`/finances/api/transactions/${txId}`,"GET", {}, onLoad)
+    request(`${ROOT_PATH}/api/transactions/${txId}`,"GET", {}, onLoad)
 }
 
 function populateWorkspace(tx) {
@@ -133,7 +133,7 @@ function handleAddNewCategoryInline() {
         }
     }
 
-    request(`/finances/api/categories`,"POST", data, onLoad)
+    request(`${ROOT_PATH}/api/categories`,"POST", data, onLoad)
 }
 
 function cancelWorkspace() {
@@ -166,7 +166,7 @@ function commitMappingRule() {
         }
     }
     
-    request(`/finances/api/rules`,"POST", data, onLoad)
+    request(`${ROOT_PATH}/api/rules`,"POST", data, onLoad)
 }
 
 
