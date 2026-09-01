@@ -9,6 +9,17 @@
             <p class="text-xs text-gray-500">Overview of importable accounts.</p>
         </div>
 
+        <div class="grid grid-cols-2 gap-4 mb-4">
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+                <p class="text-[11px] font-bold uppercase tracking-wider text-gray-400">Total Transactions</p>
+                <p class="text-2xl font-mono font-bold text-gray-900 mt-1">{{ summary.total_count }}</p>
+            </div>
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+                <p class="text-[11px] font-bold uppercase tracking-wider text-gray-400">Uncategorized</p>
+                <p class="text-2xl font-mono font-bold mt-1 {% if summary.uncategorized_count %}text-amber-600{% else %}text-gray-900{% endif %}">{{ summary.uncategorized_count }}</p>
+            </div>
+        </div>
+
         <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
@@ -17,7 +28,7 @@
                             <th class="py-2.5 px-4">Account</th>
                             <th class="py-2.5 px-4">Last Imported</th>
                             <th class="py-2.5 px-4">Most Recent Transaction</th>
-                            <th class="py-2.5 px-4 text-right">Uncategorized</th>
+                            <th class="py-2.5 px-4 text-right">Transactions</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100 text-xs text-gray-600 font-medium">
@@ -27,7 +38,11 @@
                                 {% if account.last_import %}
                                     <td class="py-3 px-4 font-mono text-gray-500">{{ account.last_import.replace(microsecond=0) }}</td>
                                     <td class="py-3 px-4 font-mono text-gray-500">{% if account.last_transaction %}{{ account.last_transaction|format_date }}{% else %}—{% endif %}</td>
-                                    <td class="py-3 px-4 text-right font-mono font-bold {% if account.uncategorized_count %}text-amber-600{% else %}text-gray-400{% endif %}">{{ account.uncategorized_count or 0 }}</td>
+                                    <td class="py-3 px-4 text-right font-mono">
+                                        <span class="font-bold {% if account.uncategorized_count %}text-amber-600{% else %}text-gray-300{% endif %}">{{ account.uncategorized_count or 0 }}</span>
+                                        <span class="text-gray-300 mx-0.5">/</span>
+                                        <span class="font-bold text-gray-900">{{ account.total_count or 0 }}</span>
+                                    </td>
                                 {% else %}
                                     <td class="py-3 px-4 text-gray-400 italic" colspan="3">Never imported</td>
                                 {% endif %}
