@@ -88,7 +88,7 @@ AuthedUser = Annotated[str, Depends(auth_session)]
 def is_match(tr, rules:dict) -> int:
     for target_account_id, conditions_list in rules.items():
         for conditions in conditions_list:
-            if all(re.search(val, tr[col]) for col, val in conditions.items()):
+            if all(re.search(str(val), str(tr[col])) for col, val in conditions.items()):
                 return target_account_id
     return UNKNOWN_ACCOUNT_ID
 
