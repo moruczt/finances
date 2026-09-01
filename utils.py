@@ -4,7 +4,7 @@ load_dotenv()
 import json
 import re
 from dataclasses import dataclass
-from typing import Annotated
+from typing import Annotated, Any
 import logging
 import sys
 
@@ -45,14 +45,14 @@ def setup_logging():
         ]
     )
 
-def log(msg:str, level:str="info"):
+def log(msg:Any, level:str="info"):
     levels = {
         "debug": logger.debug,
         "info": logger.info,
         "warning": logger.warning,
         "error": logger.error
     }
-    levels.get(level, logger.debug)(msg)
+    levels.get(level, logger.debug)(str(msg))
 
 
 def hash_pw(password:str) -> str:
