@@ -117,13 +117,20 @@ async def apply_rule(rule_id:int, db:AsyncSession) -> int:
 
         merged_entry_id = None
         if target_id in transfer_account_ids:
+            # A placeholder leg for this same event, if it already exists, would be sitting on
+            # THIS account (rule.account_id) - the other side's own categorization would have
+            # pointed it here. Exclude ones already resolved by an earlier merge (their
+            # raw_import_id now points at their own account) so duplicate same-day/same-amount
+            # transfers each match a distinct, still-unresolved counterpart.
             query = select(models.Entry.id) \
                     .join(models.Transaction, models.Transaction.id==models.Entry.transaction_id) \
-                    .where(models.Entry.account_id==target_id,
+                    .join(models.RawImport, models.RawImport.id==models.Entry.raw_import_id) \
+                    .where(models.Entry.account_id==rule.account_id,
                            models.Entry.is_base==False,
                            models.Transaction.is_temporary==False,
                            models.Transaction.date==base["date"],
-                           models.Entry.amount_huf==base["amount_huf"])
+                           models.Entry.amount_huf==base["amount_huf"],
+                           models.RawImport.account_id!=models.Entry.account_id)
             merged_entry_id = (await db.execute(query)).scalar()
 
         if merged_entry_id:

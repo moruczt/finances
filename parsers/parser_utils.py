@@ -40,14 +40,20 @@ async def import_trs(data:DataFrame, db:AsyncSession, import_id:int, account_id:
     for _, tr in data.iterrows():
         direction = None
         if tr["_target_account_id"] in transfer_account_ids:
-            # An already-confirmed transaction on the target account may already carry this
-            # transfer's other leg (imported/categorized from that side first) - link this raw
-            # row to it instead of creating a redundant transaction for the same real event.
-            query = select(models.Entry.id).join(models.Transaction, models.Transaction.id==models.Entry.transaction_id).where(models.Transaction.is_temporary==False,
+            # The target side may have already been categorized as a transfer back to THIS
+            # account, leaving a placeholder leg sitting here - link this raw row to it instead
+            # of creating a redundant transaction for the same real event. Exclude placeholders
+            # already resolved by an earlier row in this same import (raw_import_id now points
+            # at their own account) so duplicate same-day/same-amount transfers each match a
+            # distinct, still-unresolved counterpart rather than the same one repeatedly.
+            query = select(models.Entry.id).join(models.Transaction, models.Transaction.id==models.Entry.transaction_id) \
+                                            .join(models.RawImport, models.RawImport.id==models.Entry.raw_import_id) \
+                                            .where(models.Transaction.is_temporary==False,
                                                   models.Transaction.date==tr["_date"],
                                                   models.Entry.account_id==account_id,
                                                   models.Entry.is_base==False,
-                                                  models.Entry.amount_huf==tr["_amount"])
+                                                  models.Entry.amount_huf==tr["_amount"],
+                                                  models.RawImport.account_id!=account_id)
             entry_id = (await db.execute(query)).scalar()
             if entry_id:
                 query = update(models.Entry).values(raw_import_id=tr["_raw_id"]).where(models.Entry.id==entry_id)
