@@ -16,20 +16,30 @@
         <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
             <div class="divide-y divide-gray-100">
                 {% for account in accounts %}
-                    <div class="flex items-center justify-between gap-3 pr-4 py-2.5 hover:bg-gray-50/50 transition-colors" style="padding-left: {{ 1 + account.depth * 1.25 }}rem;">
+                    <div class="flex items-center justify-between gap-3 pr-4 py-2.5 transition-colors {% if account.is_side %}bg-gray-50/70{% else %}hover:bg-gray-50/50{% endif %}" style="padding-left: {{ 1 + account.depth * 1.25 }}rem;">
                         <div class="flex items-center gap-2 min-w-0">
-                            <span id="account-name-{{ account.id }}" class="text-sm {% if account.has_children %}font-semibold text-gray-800{% else %}text-gray-600{% endif %} truncate">{{ account.name }}</span>
-                            <span class="text-[9px] font-mono font-bold text-gray-300 uppercase tracking-wider shrink-0">{{ account.side.value }}</span>
+                            {% if account.is_side %}
+                                <span class="text-[11px] font-bold text-gray-500 uppercase tracking-wider truncate">{{ account.name }}</span>
+                            {% else %}
+                                <span id="account-name-{{ account.id }}" class="text-sm {% if account.has_children %}font-semibold text-gray-800{% else %}text-gray-600{% endif %} truncate">{{ account.name }}</span>
+                                <span class="text-[9px] font-mono font-bold text-gray-300 uppercase tracking-wider shrink-0">{{ account.side.value }}</span>
+                            {% endif %}
                         </div>
                         <div class="flex items-center gap-1 shrink-0">
-                            {% if account.has_children %}
-                                <button type="button" data-account-id="{{ account.id }}" data-path="{{ account.path }}" onclick="addChildAccount(this)" title="Add child account" class="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer">
+                            {% if account.is_side %}
+                                <button type="button" data-side="{{ account.name }}" onclick="addRootAccount(this)" title="Add top-level account" class="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
                                 </button>
+                            {% else %}
+                                {% if account.has_children %}
+                                    <button type="button" data-account-id="{{ account.id }}" data-path="{{ account.path }}" onclick="addChildAccount(this)" title="Add child account" class="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+                                    </button>
+                                {% endif %}
+                                <button type="button" data-account-id="{{ account.id }}" onclick="renameAccount(this)" title="Rename account" class="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                                </button>
                             {% endif %}
-                            <button type="button" data-account-id="{{ account.id }}" onclick="renameAccount(this)" title="Rename account" class="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
-                            </button>
                         </div>
                     </div>
                 {% endfor %}
