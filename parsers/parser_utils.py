@@ -19,7 +19,7 @@ async def import_trs(data:DataFrame, db:AsyncSession, import_id:int, account_id:
     if not data.size:
         return {"success":True, "row_count":orig_size, "imported_count":0, "min_date":None, "max_date":None}
     data["_source"] = "import"
-    import_data = data[filter(lambda c: not c.startswith("_"), data.columns)].fillna("").apply(lambda tr: json.dumps(tr.to_dict()), axis=1).to_frame("raw_data")
+    import_data = data[filter(lambda c: not c.startswith("_"), data.columns)].fillna("").apply(lambda tr: json.dumps(tr.to_dict(), default=str), axis=1).to_frame("raw_data")
     import_data["account_id"] = account_id
     import_data["row_hash"] = data["_fingerprint"]
     import_data["import_id"] = import_id
