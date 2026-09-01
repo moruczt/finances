@@ -55,12 +55,16 @@ function populateWorkspace(tx) {
     renderActiveRules();
 }
 
+function escapeRegex(str) {
+    return str.replace(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`);
+}
+
 function addRegexRuleFromCell(key, value) {
     if (currentActiveRegexRules.some(r => r.key === key)) return;
 
     currentActiveRegexRules.push({
         key: key,
-        regex: `^${value.toString()}$`
+        regex: `^${escapeRegex(value.toString())}$`
     });
 
     renderActiveRules();

@@ -85,12 +85,19 @@ async def auth_session(request:Request, redis:REDIS) -> str:
 AuthedUser = Annotated[str, Depends(auth_session)]
 
 
+def _condition_matches(col, val, tr):
+    try:
+        return re.search(str(val), str(tr[col])) is not None
+    except re.error as err:
+        log(f"Invalid rule pattern {val!r} for column {col!r}: {err}", "warning")
+        return False
+
 def is_match(tr, rules:dict) -> int:
     for target_account_id, conditions_list in rules.items():
         for conditions in conditions_list:
             # An empty conditions dict must never match - all() of an empty iterable is True,
             # which would otherwise match every row unconditionally.
-            if conditions and all(re.search(str(val), str(tr[col])) for col, val in conditions.items()):
+            if conditions and all(_condition_matches(col, val, tr) for col, val in conditions.items()):
                 return target_account_id
     return UNKNOWN_ACCOUNT_ID
 
