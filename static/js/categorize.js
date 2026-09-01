@@ -106,40 +106,6 @@ function removeRegexRule(index) {
 }
 
 
-function handleAddNewCategoryInline() {
-    const select = document.getElementById('categorySelect');
-    const selectedOption = select.options[select.selectedIndex];
-    const parentPath = selectedOption.dataset['path'];
-    const newName = document.getElementById('newCategoryName').value.trim();
-
-    if(!newName) {
-        showToast("Please define a sub-hierarchy category first.", "info");
-        return;
-    }
-
-    const data = {
-        "parentPath": parentPath,
-        "category": newName,
-    };
-
-    const onLoad = (resp) => {
-        if (resp.success) {
-            const completeGeneratedPath = `${parentPath}:${newName}`;
-            const newOpt = document.createElement('option');
-            const mockGeneratedId = 500; // Mock ID assignment
-            newOpt.value = mockGeneratedId;
-            newOpt.text = completeGeneratedPath;
-            newOpt.dataset['path'] = completeGeneratedPath;
-            newOpt.selected = true;
-            select.add(newOpt);
-            document.getElementById('newCategoryName').value = "";
-            select.dispatchEvent(new Event('change'));
-        }
-    }
-
-    request(`${ROOT_PATH}/api/categories`,"POST", data, onLoad)
-}
-
 function cancelWorkspace() {
     document.getElementById('workspaceForm').classList.add('hidden');
     document.getElementById('workspaceEmptyState').classList.remove('hidden');
@@ -172,15 +138,3 @@ function commitMappingRule() {
     
     request(`${ROOT_PATH}/api/rules`,"POST", data, onLoad)
 }
-
-
-// PAGE LOAD SCRIPTS
-
-const select = document.getElementById('categorySelect');
-const prefixLabel = document.getElementById('newCategoryParentPrefix');
-
-select.addEventListener('change', () => {
-    const selectedOption = select.options[select.selectedIndex];
-    const activePath = selectedOption.dataset['path'];
-    prefixLabel.innerText = activePath ? activePath + ":" : "Root:";
-});

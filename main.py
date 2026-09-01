@@ -14,6 +14,7 @@ from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy import select, insert, update, delete, text, func, and_
 from sqlalchemy.orm import selectinload, joinedload, aliased
+from sqlalchemy.exc import IntegrityError
 
 import models
 import utils
@@ -62,9 +63,8 @@ custom_filters = {"format_currency": format_currency,
 templates.env.filters.update(custom_filters)
 
 
-class NewCategoryPayload(BaseModel):
-    parentPath: str
-    category: str
+class AccountNamePayload(BaseModel):
+    name: str
 
 class RuleItem(BaseModel):
     key: str
@@ -214,6 +214,29 @@ async def page_categorise(request:Request, db:DB, user:AuthedUser):
 async def page_manual():
     return "MANUAL HTML"
 
+@app.get("/config", response_class=HTMLResponse)
+async def page_config(request:Request, db:DB, user:AuthedUser):
+    ChildAccount = aliased(models.Account)
+    query = select(models.Account.id,
+                   models.Account.name,
+                   models.Account.path,
+                   models.Account.side,
+                   func.count(ChildAccount.id).label("child_count")) \
+            .outerjoin(ChildAccount, ChildAccount.parent_id==models.Account.id) \
+            .group_by(models.Account.id) \
+            .order_by(models.Account.path)
+    rows = (await db.execute(query)).mappings().all()
+    accounts = [{"id":r["id"],
+                "name":r["name"],
+                "path":r["path"],
+                "side":r["side"],
+                "depth":r["path"].count(":"),
+                "has_children":r["child_count"] > 0} for r in rows]
+    return templates.TemplateResponse(
+                request=request,
+                name="config.html",
+                context={"accounts":accounts})
+
 ## APIs
 @app.post("/api/accounts/{account_id}/import")
 async def import_raw(account_id:int, request:Request, db:DB, file:Annotated[UploadFile,File(...)], user:AuthedUser):
@@ -267,21 +290,74 @@ async def fetch_transaction(transaction_id:int, request:Request, db:DB, user:Aut
                    "raw_json": tr.raw_imports[0].details}
     return {"success":True, "result":{"transaction":transaction}}
 
-@app.post("/api/categories")
-async def add_category(payload:NewCategoryPayload, request:Request, db:DB, user:AuthedUser):
-    query = select(models.Account.id, models.Account.side).where(models.Account.path == payload.parentPath)
-    parent_account = (await db.execute(query)).mappings().first()
-    if not parent_account:
-        return {"success":False, "msg":"Parent path not found", "msgType":"error", "msgDur":4000, "result":{}}
-    
-    query = insert(models.Account).values(parent_id=parent_account["id"],
-                                          name=payload.category,
-                                          side=parent_account["side"],
-                                          path=f"{payload.parentPath}:{payload.category}").returning(models.Account.id)
-    new_id = (await db.execute(query)).scalar_one()
-    await db.commit()
+@app.post("/api/accounts/{parent_id}/children")
+async def add_child_account(parent_id:int, payload:AccountNamePayload, request:Request, db:DB, user:AuthedUser):
+    name = payload.name.strip()
+    if not name:
+        return {"success":False, "msg":"Name is required", "msgType":"error", "msgDur":4000, "result":{}}
+    if ":" in name:
+        return {"success":False, "msg":"Account name cannot contain ':'", "msgType":"error", "msgDur":4000, "result":{}}
 
-    return {"success":True, "result":{"id":new_id}}
+    query = select(models.Account.path, models.Account.side).where(models.Account.id==parent_id)
+    parent = (await db.execute(query)).mappings().first()
+    if not parent:
+        return {"success":False, "msg":"Parent account not found", "msgType":"error", "msgDur":4000, "result":{}}
+
+    try:
+        query = insert(models.Account).values(parent_id=parent_id,
+                                              name=name,
+                                              side=parent["side"],
+                                              path=f"{parent['path']}:{name}").returning(models.Account.id)
+        new_id = (await db.execute(query)).scalar_one()
+        await db.commit()
+    except IntegrityError:
+        await db.rollback()
+        return {"success":False, "msg":"An account with that name already exists here", "msgType":"error", "msgDur":4000, "result":{}}
+
+    return {"success":True, "msg":"Account created", "msgType":"success", "msgDur":3000, "result":{"id":new_id}}
+
+@app.patch("/api/accounts/{account_id}")
+async def rename_account(account_id:int, payload:AccountNamePayload, request:Request, db:DB, user:AuthedUser):
+    name = payload.name.strip()
+    if not name:
+        return {"success":False, "msg":"Name is required", "msgType":"error", "msgDur":4000, "result":{}}
+    if ":" in name:
+        return {"success":False, "msg":"Account name cannot contain ':'", "msgType":"error", "msgDur":4000, "result":{}}
+
+    query = select(models.Account.path, models.Account.parent_id).where(models.Account.id==account_id)
+    account = (await db.execute(query)).mappings().first()
+    if not account:
+        return {"success":False, "msg":"Account not found", "msgType":"error", "msgDur":4000, "result":{}}
+
+    old_path = account["path"]
+    if account["parent_id"] is not None:
+        query = select(models.Account.path).where(models.Account.id==account["parent_id"])
+        parent_path = (await db.execute(query)).scalar_one()
+        new_path = f"{parent_path}:{name}"
+    else:
+        new_path = name
+
+    try:
+        query = update(models.Account).values(name=name, path=new_path).where(models.Account.id==account_id)
+        await db.execute(query)
+
+        if new_path != old_path:
+            # Account.path is a materialized "Root:Section:Name" string, not derived on read -
+            # cascade the prefix change to every descendant.
+            query = select(models.Account.id, models.Account.path)
+            all_accounts = (await db.execute(query)).mappings().all()
+            prefix = old_path + ":"
+            for a in all_accounts:
+                if a["id"] != account_id and a["path"].startswith(prefix):
+                    new_child_path = new_path + a["path"][len(old_path):]
+                    await db.execute(update(models.Account).values(path=new_child_path).where(models.Account.id==a["id"]))
+
+        await db.commit()
+    except IntegrityError:
+        await db.rollback()
+        return {"success":False, "msg":"An account with that name already exists here", "msgType":"error", "msgDur":4000, "result":{}}
+
+    return {"success":True, "msg":"Account renamed", "msgType":"success", "msgDur":3000, "result":{}}
 
 @app.post("/api/rules")
 async def apply_rule(payload:NewRulePayload, request:Request, db:DB, user:AuthedUser):
