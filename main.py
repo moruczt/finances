@@ -128,17 +128,27 @@ async def page_dashboard(request:Request, db:DB, user:AuthedUser):
 
 ## LOGIN
 @app.get("/login", response_class=HTMLResponse)
-async def page_login(request:Request):
+async def page_login(request:Request, redis:REDIS):
+    session_id = request.cookies.get("session_id")
+    if session_id and await redis.get(f"session:{session_id}"):
+        return RedirectResponse(url=request.url_for("page_dashboard"), status_code=303)
     return templates.TemplateResponse(
                 request=request,
                 name="login.html",
-                context={})
+                context={"error": request.query_params.get("error") == "1"})
 
 @app.post("/login")
 async def send_login(request:Request, username:Annotated[str,Form(...)], password:Annotated[str,Form(...)], redis:REDIS, db:DB, next:Annotated[str,Form(...)]=None):
     user = await utils.authenticate_user(username, password, db)
     if not user:
-        raise utils.AuthenticationRequiredException("Invalid credentials")
+        # Redirect back to the login page directly (rather than raising
+        # AuthenticationRequiredException) so the original next survives - that exception's
+        # handler would otherwise rebuild next from this POST /login request's own path,
+        # clobbering the destination the user was actually trying to reach.
+        login_url = request.url_for("page_login").include_query_params(error="1")
+        if next:
+            login_url = login_url.include_query_params(next=next)
+        return RedirectResponse(url=login_url, status_code=303)
     session_id = str(uuid.uuid4())
     expiry = os.getenv("SESSION_EXPIRY_SECS", 60*60)
     await redis.setex(f"session:{session_id}", expiry, user)
