@@ -12,7 +12,9 @@ async function selectTransaction(txId) {
     const onLoad = (resp) => {
         if (resp.success) {
             populateWorkspace(resp.result.transaction);
-            suggestCategory(txId);
+            // AI category suggestion disabled for now - it was always returning null and slower
+            // than picking a category by hand. suggestCategory() is still intact below.
+            // suggestCategory(txId);
         }
     }
 
