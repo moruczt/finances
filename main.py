@@ -101,6 +101,13 @@ async def page_dashboard(request:Request, db:DB, user:AuthedUser):
                   .join(models.Transaction, models.Transaction.id==models.Entry.transaction_id) \
                   .where(models.Entry.is_base==True) \
                   .group_by(models.Entry.account_id).subquery()
+    # Unlike tx_stats_sq, this isn't limited to is_base entries: an account's balance is the sum
+    # of every entry booked against it, whether it's the side that was actually imported or the
+    # side a transfer/categorization pointed at it. No opening-balance anchor yet, so this is
+    # only the net effect of transactions recorded so far, not the true live account balance.
+    balance_sq = select(models.Entry.account_id,
+                        func.sum(models.Entry.amount_huf).label("balance")) \
+                 .group_by(models.Entry.account_id).subquery()
 
     query = select(models.Account.id,
                    models.Account.name,
@@ -108,17 +115,23 @@ async def page_dashboard(request:Request, db:DB, user:AuthedUser):
                    last_import_sq.c.last_import,
                    tx_stats_sq.c.last_transaction,
                    tx_stats_sq.c.total_count,
-                   tx_stats_sq.c.uncategorized_count) \
+                   tx_stats_sq.c.uncategorized_count,
+                   balance_sq.c.balance) \
             .join(models.AccountConfig, models.AccountConfig.account_id==models.Account.id) \
             .outerjoin(last_import_sq, last_import_sq.c.account_id==models.Account.id) \
             .outerjoin(tx_stats_sq, tx_stats_sq.c.account_id==models.Account.id) \
+            .outerjoin(balance_sq, balance_sq.c.account_id==models.Account.id) \
             .order_by(models.Account.path)
     accounts = (await db.execute(query)).mappings().all()
 
     # Every transaction has exactly one is_base entry, and that entry's account is always one
     # of the importable accounts listed above, so summing the per-account totals here is exact.
+    # Summing balances is exact too, for a different reason: transfers between two of these
+    # accounts contribute equal and opposite entries, so they net to zero in the total and only
+    # entries touching an Income/Expenses/etc. account actually move it.
     summary = {"total_count": sum(a["total_count"] or 0 for a in accounts),
-              "uncategorized_count": sum(a["uncategorized_count"] or 0 for a in accounts)}
+              "uncategorized_count": sum(a["uncategorized_count"] or 0 for a in accounts),
+              "total_balance": sum(a["balance"] or 0 for a in accounts)}
 
     return templates.TemplateResponse(
                 request=request,

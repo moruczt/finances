@@ -9,7 +9,12 @@
             <p class="text-xs text-gray-500">Overview of importable accounts.</p>
         </div>
 
-        <div class="grid grid-cols-2 gap-4 mb-4">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+                <p class="text-[11px] font-bold uppercase tracking-wider text-gray-400">Total Balance</p>
+                <p class="text-2xl font-mono font-bold mt-1 {% if summary.total_balance and summary.total_balance < 0 %}text-red-600{% else %}text-gray-900{% endif %}">{{ summary.total_balance|format_currency }}</p>
+                <p class="text-[10px] text-gray-400 mt-0.5">HUF, no opening balance applied yet</p>
+            </div>
             <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
                 <p class="text-[11px] font-bold uppercase tracking-wider text-gray-400">Total Transactions</p>
                 <p class="text-2xl font-mono font-bold text-gray-900 mt-1">{{ summary.total_count }}</p>
@@ -26,6 +31,7 @@
                     <thead>
                         <tr class="bg-gray-50 border-b border-gray-200 text-[11px] font-bold uppercase tracking-wider text-gray-400 select-none">
                             <th class="py-2.5 px-4">Account</th>
+                            <th class="py-2.5 px-4 text-right">Balance</th>
                             <th class="py-2.5 px-4">Last Imported</th>
                             <th class="py-2.5 px-4">Most Recent Transaction</th>
                             <th class="py-2.5 px-4 text-right">Transactions</th>
@@ -35,6 +41,7 @@
                         {% for account in accounts %}
                             <tr class="hover:bg-blue-50/20 transition-colors">
                                 <td class="py-3 px-4 text-gray-900 font-semibold" title="{{ account.path }}">{{ account.name }}</td>
+                                <td class="py-3 px-4 text-right font-mono font-bold {% if account.balance and account.balance < 0 %}text-red-600{% else %}text-gray-900{% endif %}">{{ account.balance|format_currency }}</td>
                                 {% if account.last_import %}
                                     <td class="py-3 px-4 font-mono text-gray-500">{{ account.last_import.replace(microsecond=0) }}</td>
                                     <td class="py-3 px-4 font-mono text-gray-500">{% if account.last_transaction %}{{ account.last_transaction|format_date }}{% else %}—{% endif %}</td>
