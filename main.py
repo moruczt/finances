@@ -483,7 +483,7 @@ async def render_manual_overview(db, month):
             "month":month.strftime("%Y-%m")}
 
 @app.get("/api/manual-overview")
-async def fetch_manual_overview(request:Request, db:DB, user:AuthedUser, month:str=None):
+async def fetch_manual_overview(request:Request, db:DB, user:AuthedUser, month:str|None=None):
     return {"success":True, "result":await render_manual_overview(db, utils.parse_month(month))}
 
 @app.post("/api/manual-entries")
@@ -510,7 +510,7 @@ async def add_manual_entry(payload:ManualEntryPayload, request:Request, db:DB, u
     return {"success":True, "msg":msg, "msgType":"success", "msgDur":3000, "result":await render_manual_overview(db, month)}
 
 @app.delete("/api/manual-entries/{entry_id}")
-async def delete_manual_entry(entry_id:int, request:Request, db:DB, user:AuthedUser, month:str=None):
+async def delete_manual_entry(entry_id:int, request:Request, db:DB, user:AuthedUser, month:str|None=None):
     query = select(models.ManualEntry.split_group).where(models.ManualEntry.id==entry_id)
     entry = (await db.execute(query)).mappings().first()
     if not entry:
@@ -526,7 +526,7 @@ async def delete_manual_entry(entry_id:int, request:Request, db:DB, user:AuthedU
     return {"success":True, "msg":"Entry deleted", "msgType":"success", "msgDur":3000, "result":await render_manual_overview(db, utils.parse_month(month))}
 
 @app.patch("/api/budgets/{budget_id}")
-async def update_budget_limit(budget_id:int, payload:BudgetLimitPayload, request:Request, db:DB, user:AuthedUser, month:str=None):
+async def update_budget_limit(budget_id:int, payload:BudgetLimitPayload, request:Request, db:DB, user:AuthedUser, month:str|None=None):
     query = update(models.Budget).values(monthly_limit=payload.monthly_limit).where(models.Budget.id==budget_id)
     if (await db.execute(query)).rowcount == 0:
         return {"success":False, "msg":"Budget not found", "msgType":"error", "msgDur":4000, "result":{}}

@@ -18,7 +18,7 @@ function renderOverview(result) {
 }
 
 function updateSplitHint() {
-    const months = parseInt(monthsInput.value) || 1;
+    const months = parseInt(monthsInput.value, 10) || 1;
     const amount = parseFloat(amountInput.value) || 0;
     if (months <= 1) {
         splitHint.classList.add('hidden');
@@ -38,8 +38,8 @@ form.addEventListener('submit', (e) => {
         amount: amountInput.value,
         description: descriptionInput.value,
         month: monthInput.value,
-        budget_id: parseInt(form.querySelector('input[name="budget"]:checked').value),
-        months: parseInt(monthsInput.value) || 1,
+        budget_id: parseInt(form.querySelector('input[name="budget"]:checked').value, 10),
+        months: parseInt(monthsInput.value, 10) || 1,
     };
 
     const onLoad = (resp) => {
@@ -67,7 +67,7 @@ overviewEl.addEventListener('click', async (e) => {
 
     const deleteBtn = e.target.closest('.entry-delete');
     if (deleteBtn) {
-        const parts = parseInt(deleteBtn.dataset.parts);
+        const parts = parseInt(deleteBtn.dataset.parts, 10);
         const message = parts > 1 ? `This entry is split across ${parts} months. All ${parts} parts will be deleted.` : 'This entry will be deleted.';
         if (!await showConfirm('Delete entry?', message, 'Delete')) return;
         const onLoad = (resp) => { if (resp.success) renderOverview(resp.result); }
@@ -80,7 +80,7 @@ overviewEl.addEventListener('click', async (e) => {
         const value = await showPrompt(`${escapeHtml(limitBtn.dataset.budgetName)} limit`, 'Monthly limit in HUF. Use 0 for no limit.', limitBtn.dataset.limit);
         if (value === null) return;
         const limit = parseFloat(value.replace(/\s/g, ''));
-        if (isNaN(limit) || limit < 0) {
+        if (Number.isNaN(limit) || limit < 0) {
             showToast('Invalid limit');
             return;
         }
