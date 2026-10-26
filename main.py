@@ -5,8 +5,9 @@ import uuid
 import importlib
 import datetime as dt
 import json
+from decimal import Decimal, ROUND_DOWN
 from typing import Annotated
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from fastapi import FastAPI, Depends, Request, UploadFile, File, Form
 from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
@@ -58,9 +59,12 @@ def format_currency(value):
     return f"{value:,.0f}".replace(",", " ") if value else 0
 def format_date(value):
     return value.strftime("%Y-%m-%d")
+def format_month(value):
+    return value.strftime("%b %Y")
 
 custom_filters = {"format_currency": format_currency,
-                  "format_date": format_date}
+                  "format_date": format_date,
+                  "format_month": format_month}
 templates.env.filters.update(custom_filters)
 
 
@@ -75,6 +79,16 @@ class NewRulePayload(BaseModel):
     rules: dict
     target_account_id: int
     transaction_id: int
+
+class ManualEntryPayload(BaseModel):
+    amount: Decimal = Field(gt=0)
+    description: str = ""
+    month: str
+    budget_id: int
+    months: int = Field(default=1, ge=1, le=60)
+
+class BudgetLimitPayload(BaseModel):
+    monthly_limit: Decimal = Field(ge=0)
 
 
 
@@ -237,9 +251,18 @@ async def page_categorise(request:Request, db:DB, user:AuthedUser):
                 context={"transactions":transactions,
                         "categories":categories})
 
-@app.get("/manual")
-async def page_manual():
-    return "MANUAL HTML"
+@app.get("/manual", response_class=HTMLResponse)
+async def page_manual(request:Request, db:DB, user:AuthedUser):
+    month = utils.parse_month(request.query_params.get("month"))
+    overview = await utils.get_manual_overview(db, month)
+    query = select(models.Budget.id, models.Budget.name).order_by(models.Budget.id)
+    budgets = (await db.execute(query)).mappings().all()
+    return templates.TemplateResponse(
+                request=request,
+                name="manual.html",
+                context={"overview":overview,
+                        "budgets":budgets,
+                        "current_month":dt.date.today().replace(day=1)})
 
 @app.get("/config", response_class=HTMLResponse)
 async def page_config(request:Request, db:DB, user:AuthedUser):
@@ -453,6 +476,62 @@ async def apply_rule(payload:NewRulePayload, request:Request, db:DB, user:Authed
     applied_count = await utils.apply_rule(new_id, db)
     await db.commit()
     return {"success":True, "msg":"Transaction successfully categorized", "msgType":"success", "msgDur":4000, "result":{"id":new_id, "applied_count":applied_count}}
+
+async def render_manual_overview(db, month):
+    overview = await utils.get_manual_overview(db, month)
+    return {"html":templates.env.get_template("snippets/manual_overview.html").render(overview=overview),
+            "month":month.strftime("%Y-%m")}
+
+@app.get("/api/manual-overview")
+async def fetch_manual_overview(request:Request, db:DB, user:AuthedUser, month:str=None):
+    return {"success":True, "result":await render_manual_overview(db, utils.parse_month(month))}
+
+@app.post("/api/manual-entries")
+async def add_manual_entry(payload:ManualEntryPayload, request:Request, db:DB, user:AuthedUser):
+    query = select(models.Budget.id).where(models.Budget.id==payload.budget_id)
+    if not (await db.execute(query)).scalar():
+        return {"success":False, "msg":"Budget not found", "msgType":"error", "msgDur":4000, "result":{}}
+
+    month = utils.parse_month(payload.month)
+    # Split evenly across consecutive months in whole forints; the first month absorbs whatever
+    # doesn't divide evenly so the parts always add back up to the amount entered.
+    part = (payload.amount / payload.months).quantize(Decimal("1"), rounding=ROUND_DOWN)
+    first_part = payload.amount - part * (payload.months - 1)
+    split_group = str(uuid.uuid4()) if payload.months > 1 else None
+    rows = [{"budget_id":payload.budget_id,
+             "month":utils.add_months(month, i),
+             "amount_huf":first_part if i == 0 else part,
+             "description":payload.description.strip(),
+             "split_group":split_group} for i in range(payload.months)]
+    await db.execute(insert(models.ManualEntry), rows)
+    await db.commit()
+
+    msg = "Entry added" if payload.months == 1 else f"Entry split across {payload.months} months"
+    return {"success":True, "msg":msg, "msgType":"success", "msgDur":3000, "result":await render_manual_overview(db, month)}
+
+@app.delete("/api/manual-entries/{entry_id}")
+async def delete_manual_entry(entry_id:int, request:Request, db:DB, user:AuthedUser, month:str=None):
+    query = select(models.ManualEntry.split_group).where(models.ManualEntry.id==entry_id)
+    entry = (await db.execute(query)).mappings().first()
+    if not entry:
+        return {"success":False, "msg":"Entry not found", "msgType":"error", "msgDur":4000, "result":{}}
+
+    # Deleting any part of a split entry removes every month of it.
+    if entry["split_group"]:
+        query = delete(models.ManualEntry).where(models.ManualEntry.split_group==entry["split_group"])
+    else:
+        query = delete(models.ManualEntry).where(models.ManualEntry.id==entry_id)
+    await db.execute(query)
+    await db.commit()
+    return {"success":True, "msg":"Entry deleted", "msgType":"success", "msgDur":3000, "result":await render_manual_overview(db, utils.parse_month(month))}
+
+@app.patch("/api/budgets/{budget_id}")
+async def update_budget_limit(budget_id:int, payload:BudgetLimitPayload, request:Request, db:DB, user:AuthedUser, month:str=None):
+    query = update(models.Budget).values(monthly_limit=payload.monthly_limit).where(models.Budget.id==budget_id)
+    if (await db.execute(query)).rowcount == 0:
+        return {"success":False, "msg":"Budget not found", "msgType":"error", "msgDur":4000, "result":{}}
+    await db.commit()
+    return {"success":True, "msg":"Budget limit updated", "msgType":"success", "msgDur":3000, "result":await render_manual_overview(db, utils.parse_month(month))}
 
 @app.delete("/api/wipe")
 async def wipe_db(db:DB, user:AuthedUser):

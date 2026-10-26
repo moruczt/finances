@@ -1,0 +1,71 @@
+<div class="flex items-center justify-between mb-3">
+    <button type="button" data-month="{{ overview.prev_month.strftime('%Y-%m') }}" class="month-nav p-2 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-white border border-transparent hover:border-gray-200 transition-colors cursor-pointer" title="Previous month">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>
+    </button>
+    <div class="text-center">
+        <p class="text-sm font-bold text-gray-900">{{ overview.month|format_month }}</p>
+        <p class="text-[11px] font-mono text-gray-500">
+            {{ overview.total_spent|format_currency }}{% if overview.total_limit %} / {{ overview.total_limit|format_currency }}{% endif %} HUF
+        </p>
+    </div>
+    <button type="button" data-month="{{ overview.next_month.strftime('%Y-%m') }}" class="month-nav p-2 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-white border border-transparent hover:border-gray-200 transition-colors cursor-pointer" title="Next month">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
+    </button>
+</div>
+
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+    {% for budget in overview.budgets %}
+        {% set over = budget.monthly_limit > 0 and budget.remaining < 0 %}
+        {% set warn = budget.percent is not none and budget.percent >= 80 %}
+        <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+            <div class="flex items-center justify-between">
+                <p class="text-[11px] font-bold uppercase tracking-wider text-gray-400">{{ budget.name }}</p>
+                <button type="button" data-budget-id="{{ budget.id }}" data-budget-name="{{ budget.name }}" data-limit="{{ budget.monthly_limit|int }}"
+                        class="budget-limit text-[10px] font-mono text-gray-400 hover:text-blue-600 cursor-pointer" title="Edit monthly limit">
+                    {% if budget.monthly_limit > 0 %}limit {{ budget.monthly_limit|format_currency }}{% else %}set limit{% endif %}
+                </button>
+            </div>
+            <p class="text-2xl font-mono font-bold mt-1 {% if over %}text-red-600{% else %}text-gray-900{% endif %}">{{ budget.spent|format_currency }}</p>
+            {% if budget.percent is not none %}
+                <div class="h-1.5 bg-gray-100 rounded-full mt-2 overflow-hidden">
+                    <div class="h-full rounded-full {% if over %}bg-red-500{% elif warn %}bg-amber-500{% else %}bg-blue-500{% endif %}" style="width: {{ budget.percent }}%"></div>
+                </div>
+                <p class="text-[11px] mt-1.5 {% if over %}text-red-600 font-semibold{% else %}text-gray-500{% endif %}">
+                    {% if over %}{{ (-budget.remaining)|format_currency }} over budget{% else %}{{ budget.remaining|format_currency }} left{% endif %}
+                </p>
+            {% else %}
+                <p class="text-[11px] text-gray-400 mt-1.5">No monthly limit set</p>
+            {% endif %}
+        </div>
+    {% endfor %}
+</div>
+
+<div class="flex items-center gap-3 mb-3">
+    <div class="h-px grow bg-linear-to-r from-transparent to-gray-200"></div>
+    <span class="text-[10px] font-bold uppercase tracking-widest text-gray-400 select-none">Recently Added</span>
+    <div class="h-px grow bg-linear-to-l from-transparent to-gray-200"></div>
+</div>
+
+<div class="bg-white rounded-xl border border-gray-200 shadow-sm divide-y divide-gray-100">
+    {% for entry in overview.entries %}
+        <div class="flex items-center gap-3 px-4 py-2.5">
+            <div class="min-w-0 grow">
+                <p class="text-sm font-semibold text-gray-900 truncate">{{ entry.description or "—" }}</p>
+                <p class="text-[11px] text-gray-500">
+                    <span class="font-semibold">{{ entry.budget_name }}</span>
+                    · {{ entry.first_month|format_month }}{% if entry.parts > 1 %} – {{ entry.last_month|format_month }} ({{ entry.parts }} months){% endif %}
+                    · <span class="font-mono">{{ entry.created_at|format_date }}</span>
+                </p>
+            </div>
+            <div class="text-right shrink-0">
+                <p class="text-sm font-mono font-bold text-gray-900">{{ entry.amount|format_currency }}</p>
+                {% if entry.parts > 1 %}<p class="text-[10px] font-mono text-gray-400">{{ (entry.amount / entry.parts)|format_currency }} / month</p>{% endif %}
+            </div>
+            <button type="button" data-entry-id="{{ entry.id }}" data-parts="{{ entry.parts }}" class="entry-delete text-gray-300 hover:text-red-500 p-1 rounded-lg transition-colors cursor-pointer shrink-0" title="Delete">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+            </button>
+        </div>
+    {% else %}
+        <div class="text-center py-6 text-xs text-gray-400 font-medium italic">No entries yet...</div>
+    {% endfor %}
+</div>
