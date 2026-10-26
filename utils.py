@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 load_dotenv()
 import json
 import re
+import datetime as dt
 from dataclasses import dataclass
 from typing import Annotated, Any
 import logging
@@ -13,7 +14,7 @@ from redis.asyncio import Redis
 from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 from sqlalchemy.ext.asyncio.session import AsyncSession
-from sqlalchemy import select, insert, update, delete
+from sqlalchemy import select, insert, update, delete, func, String, cast
 from sqlalchemy.orm import selectinload, joinedload, aliased
 
 from database import get_db, get_redis
@@ -190,4 +191,58 @@ async def apply_rule(rule_id:int, db:AsyncSession) -> int:
         applied_count += 1
     return applied_count
 
-        
+
+def parse_month(value:str|None) -> dt.date:
+    """'YYYY-MM' (what <input type="month"> sends) -> the 1st of that month. Falls back to the
+    current month for a missing or malformed value."""
+    try:
+        return dt.datetime.strptime(value, "%Y-%m").date()
+    except (TypeError, ValueError):
+        return dt.date.today().replace(day=1)
+
+def add_months(month:dt.date, count:int) -> dt.date:
+    index = month.year * 12 + month.month - 1 + count
+    return dt.date(index // 12, index % 12 + 1, 1)
+
+async def get_manual_overview(db:AsyncSession, month:dt.date) -> dict:
+    """Everything the quick-add page shows below its form: how each budget stands for the given
+    month, and the most recently added entries (a split entry listed once, as its total)."""
+    spent_sq = select(models.ManualEntry.budget_id,
+                      func.sum(models.ManualEntry.amount_huf).label("spent")) \
+               .where(models.ManualEntry.month==month) \
+               .group_by(models.ManualEntry.budget_id).subquery()
+    query = select(models.Budget.id,
+                   models.Budget.name,
+                   models.Budget.monthly_limit,
+                   func.coalesce(spent_sq.c.spent, 0).label("spent")) \
+            .outerjoin(spent_sq, spent_sq.c.budget_id==models.Budget.id) \
+            .order_by(models.Budget.id)
+    budgets = []
+    for b in (await db.execute(query)).mappings().all():
+        limit, spent = b["monthly_limit"], b["spent"]
+        budgets.append({**b, "remaining": limit - spent,
+                        "percent": min(100, round(spent / limit * 100)) if limit > 0 else None})
+
+    group_key = func.coalesce(models.ManualEntry.split_group, cast(models.ManualEntry.id, String))
+    query = select(func.min(models.ManualEntry.id).label("id"),
+                   models.ManualEntry.description,
+                   models.Budget.name.label("budget_name"),
+                   func.min(models.ManualEntry.month).label("first_month"),
+                   func.max(models.ManualEntry.month).label("last_month"),
+                   func.sum(models.ManualEntry.amount_huf).label("amount"),
+                   func.count(models.ManualEntry.id).label("parts"),
+                   func.max(models.ManualEntry.created_at).label("created_at")) \
+            .join(models.Budget, models.Budget.id==models.ManualEntry.budget_id) \
+            .group_by(group_key, models.ManualEntry.description, models.Budget.name) \
+            .order_by(func.max(models.ManualEntry.created_at).desc(), func.min(models.ManualEntry.id).desc()) \
+            .limit(25)
+    entries = (await db.execute(query)).mappings().all()
+
+    return {"month":month,
+            "prev_month":add_months(month, -1),
+            "next_month":add_months(month, 1),
+            "budgets":budgets,
+            "entries":entries,
+            "total_spent":sum(b["spent"] for b in budgets),
+            "total_limit":sum(b["monthly_limit"] for b in budgets)}
+

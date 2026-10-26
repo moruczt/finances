@@ -1,7 +1,7 @@
 import enum
 import json
 
-from sqlalchemy import Column, Integer, String, ForeignKey, Numeric, Enum, JSON, DateTime, func, Boolean
+from sqlalchemy import Column, Integer, String, ForeignKey, Numeric, Enum, JSON, DateTime, Date, func, Boolean
 from sqlalchemy.orm import relationship, DeclarativeBase
 
 
@@ -173,3 +173,36 @@ class Entry(Base):
     @property
     def account_path(self):
         return self.account.path
+
+# Quick-add spending tracker. Deliberately kept out of the transactions/entries ledger: these are
+# rough on-the-go records of spending that will show up again once the bank statement is
+# imported, so mixing them into the ledger would double-count.
+class Budget(Base):
+    __tablename__ = "budgets"
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String(50), unique=True, nullable=False)
+    monthly_limit = Column(Numeric(precision=20, scale=4), nullable=False, server_default="0")
+
+    manual_entries = relationship("ManualEntry", back_populates="budget")
+
+    def __repr__(self):
+        return f"<Budget(id={self.id}, name={self.name}, monthly_limit={self.monthly_limit})>"
+
+class ManualEntry(Base):
+    __tablename__ = "manual_entries"
+
+    id = Column(Integer, primary_key=True)
+    budget_id = Column(Integer, ForeignKey("budgets.id"), nullable=False)
+    # Always the 1st of the month the spending counts toward, independent of created_at.
+    month = Column(Date, nullable=False, index=True)
+    amount_huf = Column(Numeric(precision=20, scale=4), nullable=False)
+    description = Column(String(255))
+    # Shared by every part of an amount split across several months, so they can be listed and
+    # deleted as one.
+    split_group = Column(String(36), nullable=True, index=True)
+
+    budget = relationship("Budget", back_populates="manual_entries")
+
+    def __repr__(self):
+        return f"<ManualEntry(id={self.id}, budget_id={self.budget_id}, month={self.month}, amount_huf={self.amount_huf}, description={self.description}, split_group={self.split_group})>"

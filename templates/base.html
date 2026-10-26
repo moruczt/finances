@@ -47,7 +47,7 @@
                         <a href="{{ url_for('page_categorise') }}" class="px-3 py-1.5 rounded-lg hover:bg-slate-50 transition-colors {% if '/categorize' in request.url.path %}bg-blue-50 text-blue-600{% endif %}">Categorize</a>
                         <a href="{{ url_for('page_import') }}" class="px-3 py-1.5 rounded-lg hover:bg-slate-50 transition-colors {% if request.url.path == '/import' %}bg-blue-50 text-blue-600{% endif %}">Import File</a>
                         <a href="{{ url_for('page_imports') }}" class="px-3 py-1.5 rounded-lg hover:bg-slate-50 transition-colors {% if request.url.path == '/imports' %}bg-blue-50 text-blue-600{% endif %}">Logs</a>
-                        <a href="{{ url_for('page_manual') }}" class="px-3 py-1.5 rounded-lg hover:bg-slate-50 transition-colors {% if '/manual' in request.url.path %}bg-blue-50 text-blue-600{% endif %}">Manual Entry</a>
+                        <a href="{{ url_for('page_manual') }}" class="px-3 py-1.5 rounded-lg hover:bg-slate-50 transition-colors {% if '/manual' in request.url.path %}bg-blue-50 text-blue-600{% endif %}">Quick Add</a>
                         <a href="{{ url_for('page_config') }}" class="px-3 py-1.5 rounded-lg hover:bg-slate-50 transition-colors {% if '/config' in request.url.path %}bg-blue-50 text-blue-600{% endif %}">Config</a>
                     </nav>
                 </div>

@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %} - Quick Add{% endblock %}
+
+{% block scripts %}
+    <script defer src="{{ url_for('static', path='/js/manual.js').path }}"></script>
+{% endblock %}
+
+{% block content %}
+    <div class="max-w-xl mx-auto px-4 sm:px-6 py-6 animate-fade-in">
+        <div class="pb-4 border-b border-gray-200 mb-4">
+            <h1 class="text-xl font-bold text-gray-900 tracking-tight">Quick Add</h1>
+            <p class="text-xs text-gray-500">On-the-go spending against monthly budgets. Kept separate from imported transactions.</p>
+        </div>
+
+        <form id="manualForm" class="bg-white rounded-xl border border-gray-200 shadow-sm p-4 space-y-3 mb-6">
+            <div>
+                <label for="amountInput" class="block text-[11px] font-bold uppercase tracking-wider text-gray-400 mb-1">Amount (HUF)</label>
+                <input id="amountInput" type="number" inputmode="numeric" min="1" step="any" required autofocus placeholder="0"
+                       class="w-full px-3 py-2.5 text-2xl font-mono font-bold text-gray-900 bg-white border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" />
+            </div>
+
+            <div>
+                <label for="descriptionInput" class="block text-[11px] font-bold uppercase tracking-wider text-gray-400 mb-1">Description</label>
+                <input id="descriptionInput" type="text" maxlength="255" placeholder="e.g. Lunch, groceries..."
+                       class="w-full px-3 py-2 text-sm bg-white border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" />
+            </div>
+
+            <div>
+                <span class="block text-[11px] font-bold uppercase tracking-wider text-gray-400 mb-1">Budget</span>
+                <div class="flex gap-2">
+                    {% for budget in budgets %}
+                        <label class="flex-1 cursor-pointer">
+                            <input type="radio" name="budget" value="{{ budget.id }}" class="peer sr-only" {% if loop.first %}checked{% endif %} />
+                            <span class="block text-center px-3 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold text-gray-600 transition-colors peer-checked:bg-blue-50 peer-checked:border-blue-500 peer-checked:text-blue-600">{{ budget.name }}</span>
+                        </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label for="monthInput" class="block text-[11px] font-bold uppercase tracking-wider text-gray-400 mb-1">Month</label>
+                    <input id="monthInput" type="month" required value="{{ current_month.strftime('%Y-%m') }}"
+                           class="w-full px-3 py-2 text-sm bg-white border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" />
+                </div>
+                <div>
+                    <label for="monthsInput" class="block text-[11px] font-bold uppercase tracking-wider text-gray-400 mb-1">Split over months</label>
+                    <input id="monthsInput" type="number" inputmode="numeric" min="1" max="60" step="1" value="1" required
+                           class="w-full px-3 py-2 text-sm font-mono bg-white border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" />
+                </div>
+            </div>
+            <p id="splitHint" class="hidden text-[11px] text-gray-500"></p>
+
+            <button id="addBtn" type="submit" class="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-sm font-semibold text-white shadow-sm transition-colors cursor-pointer disabled:opacity-60">
+                Add
+            </button>
+        </form>
+
+        <div id="manualOverview">
+            {% include "snippets/manual_overview.html" %}
+        </div>
+    </div>
+{% endblock %}
